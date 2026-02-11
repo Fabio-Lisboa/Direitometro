@@ -52,27 +52,29 @@
 
   <div id="emoji-modal" class="modal hidden">
     <div class="modal-content">
-      <h3 id="modal-title">Escolha para Fulano:</h3>
+      <h3 id="modal-title">Escolha:</h3>
       <div id="emoji-grid" class="emoji-grid"></div>
-      <button id="close-modal" class="danger-btn">Cancelar</button>
+      <button id="close-modal" class="danger-btn" style="margin-top: 15px;">Cancelar</button>
     </div>
   </div>
 
   <div id="settings-modal" class="modal hidden">
     <div class="modal-content">
-      <h3>Gerenciar Perfil</h3>
-      <p>O que deseja fazer?</p>
+      <h3 id="settings-title">Gerenciar Perfil</h3>
       
-      <div class="input-group" style="margin-bottom: 15px;">
-        <label>Nova Senha (1 char):</label>
-        <input id="new-password" maxlength="1" placeholder="Nova senha..." />
-        <button id="save-pass-btn">💾 Salvar Nova Senha</button>
+      <div id="normal-user-settings">
+        <p>Alterar sua senha atual:</p>
+        <div class="input-group" style="margin-bottom: 15px;">
+          <input id="new-password" maxlength="1" placeholder="Nova senha (1 char)..." />
+          <button id="save-pass-btn">💾 Salvar</button>
+        </div>
+        <hr>
+        <button id="delete-account-btn" class="danger-btn">🗑️ Excluir Minha Conta</button>
       </div>
 
-      <hr style="width: 100%; border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+      <div id="admin-user-list" class="hidden"></div>
 
-      <button id="delete-account-btn" class="danger-btn">🗑️ Excluir Minha Conta</button>
-      <button id="close-settings" class="secondary-btn" style="margin-top:10px">Fechar</button>
+      <button id="close-settings" class="secondary-btn" style="margin-top:15px">Fechar</button>
     </div>
   </div>
 

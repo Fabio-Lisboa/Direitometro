@@ -1,494 +1,122 @@
-// Constantes globais
-const TODAY = new Date().toISOString().split('T')[0];
+/**
+ * Direitômetro - Core Engine
+ * Versão Estável para Produção (Vercel Ready)
+ */
 
-// Helpers para LocalStorage
-const getUsers = () => JSON.parse(localStorage.getItem("qm_users") || "{}");
-const saveUsers = (users) => localStorage.setItem("qm_users", JSON.stringify(users));
-const getVotes = () => JSON.parse(localStorage.getItem("qm_votes") || "{}");
-const saveVotes = (votes) => localStorage.setItem("qm_votes", JSON.stringify(votes));
+document.addEventListener("DOMContentLoaded", () => {
+  // --- CONFIGURAÇÕES E ESTADO ---
+  const TODAY = new Date().toISOString().split('T')[0];
+  
+  const elements = {
+    loginBtn: document.getElementById("loginBtn"),
+    usernameInput: document.getElementById("username"),
+    passwordInput: document.getElementById("password"),
+    loginError: document.getElementById("loginError"),
+    loginCard: document.getElementById("login"),
+    appCard: document.getElementById("app"),
+    userList: document.getElementById("users"),
+    resultsDiv: document.getElementById("results")
+  };
 
-// Seleção de elementos
-const loginDiv = document.getElementById("login");
-const appDiv = document.getElementById("app");
-const loginBtn = document.getElementById("loginBtn");
-const loginError = document.getElementById("loginError");
+  // --- PERSISTÊNCIA DE DADOS (LocalStorage) ---
+  const db = {
+    getUsers: () => JSON.parse(localStorage.getItem("qm_users") || "{}"),
+    saveUsers: (users) => localStorage.setItem("qm_users", JSON.stringify(users)),
+    getVotes: () => JSON.parse(localStorage.getItem("qm_votes") || "{}"),
+    saveVotes: (votes) => localStorage.setItem("qm_votes", JSON.stringify(votes))
+  };
 
-// --- FUNÇÕES DE NAVEGAÇÃO ---
-function showApp() {
-  loginDiv.classList.add("hidden");
-  appDiv.classList.remove("hidden");
-  renderUsers();
-  renderResults();
-}
+  // --- CORE FUNCTIONS ---
 
-// --- LOGIN ---
-loginBtn.addEventListener("click", () => {
-  const username = document.getElementById("username").value.trim();
-  const password = document.getElementById("password").value.trim();
-
-  loginError.textContent = "";
-
-  if (!username || password.length !== 1) {
-    loginError.textContent = "Usuário inválido ou senha precisa ter 1 caractere.";
-    return;
+  function showApp() {
+    elements.loginCard.classList.add("hidden");
+    elements.appCard.classList.remove("hidden");
+    renderUsers();
+    renderResults();
   }
 
-  const users = getUsers();
-
-  // Cadastro simples ou verificação
-  if (!users[username]) {
-    users[username] = password;
-    saveUsers(users);
-  } else if (users[username] !== password) {
-    loginError.textContent = "Senha incorreta.";
-    return;
-  }
-
-  sessionStorage.setItem("qm_logged", username);
-  showApp();
-});
-
-// --- RENDERIZAR USUÁRIOS ---
-function renderUsers() {
-  const users = Object.keys(getUsers());
-  const list = document.getElementById("users");
-  list.innerHTML = "";
-
-  users.forEach(u => {
-    const div = document.createElement("div");
-    div.className = "user";
-
-    const span = document.createElement("span");
-    span.textContent = u;
-
-    const btn = document.createElement("button");
-    btn.textContent = "❤️";
-    btn.className = "emoji-btn";
-    btn.onclick = () => vote(u);
-
-    div.appendChild(span);
-    div.appendChild(btn);
-    list.appendChild(div);
-  });
-}
-
-// --- SISTEMA DE VOTO ---
-function vote(target) {
-  const currentUser = sessionStorage.getItem("qm_logged");
-  if (!currentUser) return;
-
-  const votes = getVotes();
-  if (!votes[TODAY]) votes[TODAY] = {};
-
-  // Impede voto duplicado no mesmo dia
-  if (votes[TODAY][currentUser]) {
-    alert("Você já votou hoje!");
-    return;
-  }
-
-  votes[TODAY][currentUser] = target;
-  saveVotes(votes);
-  renderResults();
-}
-
-// --- RESULTADOS ---
-function renderResults() {
-  const votes = getVotes()[TODAY] || {};
-  const count = {};
-
-  Object.values(votes).forEach(target => {
-    count[target] = (count[target] || 0) + 1;
-  });
-
-  const resultsDiv = document.getElementById("results");
-  resultsDiv.innerHTML = "";
-
-  Object.entries(count)
-    .sort((a, b) => b[1] - a[1])
-    .forEach(([user, total]) => {
-      const p = document.createElement("p");
-      p.textContent = `${user}: ${total} ❤️`;
-      resultsDiv.appendChild(p);
-    });
-}
-
-// Verifica login ao carregar a página
-window.onload = () => {
-  if (sessionStorage.getItem("qm_logged")) {
-    showApp();
-  }
-};      const btn = document.createElement("button");
-      btn.textContent = e;
-      btn.className = "emoji-btn";
-      btn.addEventListener("click", () => vote(u, e));
-      emojiContainer.appendChild(btn);
-    });
-
-    div.appendChild(span);
-    div.appendChild(emojiContainer);
-    list.appendChild(div);
-  });
-}
-
-// ================= VOTO =================
-function vote(target, emoji) {
-  const username = sessionStorage.getItem("qm_logged");
-  if (!username) return;
-
-  const votes = getVotes();
-  if (!votes[TODAY]) votes[TODAY] = {};
-
-  // impede voto duplicado no dia
-  if (votes[TODAY][username]) return;
-
-  votes[TODAY][username] = { target, emoji };
-  saveVotes(votes);
-
-  renderResults();
-}
-
-// ================= RESULTADOS =================
-function renderResults() {
-  const votes = getVotes()[TODAY] || {};
-  const count = {};
-
-  Object.values(votes).forEach(v => {
-    const key = `${v.target}_${v.emoji}`;
-    count[key] = (count[key] || 0) + 1;
-  });
-
-  const resultsDiv = document.getElementById("results");
-  resultsDiv.innerHTML = "";
-
-  Object.entries(count)
-    .sort((a, b) => b[1] - a[1])
-    .forEach(([key, total]) => {
-      const [user, emoji] = key.split("_");
-      const p = document.createElement("p");
-      p.textContent = `${user} ${emoji} : ${total}`;
-      resultsDiv.appendChild(p);
-    });
-}
-}
-
-
-sessionStorage.setItem("qm_logged", username);
-showApp();
-});
-});return;
-}
-
-
-if (!users[username]) {
-users[username] = password;
-saveUsers(users);
-}
-
-
-sessionStorage.setItem("qm_logged", username);
-showApp();
-};
-});saveUsers(users);
-}
-
-
-sessionStorage.setItem("qm_logged", username);
-showApp();
-});
-
-
-function renderUsers() {
-const users = Object.keys(getUsers());
-const list = document.getElementById("users");
-list.innerHTML = "";
-
-
-const emojis = [
-"❤️","🧡","💛","💚","💙","💜","🖤","🤍","🤎","💖","💔",
-"😊","😂","🤣","😍","🥰","😘","😎","🤩","🥳","😴","🤯","😇","😈","💀","🤡",
-"😡","🤬","😭","😢","😤","😱","😨","😰","😬","🙄","🤔",
-"👏","🙌","👍","👎","✌️","🤝","🙏","💪","🔥","✨","🌟","⚡",
-"🎉","🎊","🏆","🥇","🥈","🥉","🎮","🎵","🎶","📚","💻","📱",
-"🍕","🍔","🍟","🍿","🍩","🍫","🍪","☕","🍺","🍹","🍎","🍉",
-"🐶","🐱","🐸","🐼","🦊","🐵","🦁","🐯","🐨","🐷","🐮","🐔"
-];
-
-
-users.forEach(u => {
-const div = document.createElement("div");
-div.className = "user";
-
-
-const span = document.createElement("span");
-span.textContent = u;
-
-
-const emojiContainer = document.createElement("div");
-
-
-emojis.forEach(e => {
-const btn = document.createElement("button");
-btn.textContent = e;
-btn.className = "emoji-btn";
-btn.addEventListener("click", () => vote(u, e));
-emojiContainer.appendChild(btn);
-});
-
-
-div.appendChild(span);
-div.appendChild(emojiContainer);
-list.appendChild(div);
-});
-}
-
-
-function vote(target, emoji) {
-const username = sessionStorage.getItem("qm_logged");
-if (!username) return;
-
-
-const votes = getVotes();
-if (!votes[TODAY]) votes[TODAY] = {};
-
-
-if (votes[TODAY][username]) return;
-
-
-votes[TODAY][username] = { target, emoji };
-saveVotes(votes);
-
-
-renderResults();
-}
-
-
-function renderResults() {
-const votes = getVotes()[TODAY] || {};
-const count = {};
-
-
-Object.values(votes).forEach(v => {
-const key = `${v.target}_${v.emoji}`;
-count[key] = (count[key] || 0) + 1;
-});
-
-
-const resultsDiv = document.getElementById("results");
-resultsDiv.innerHTML = "";
-
-
-Object.entries(count)
-.sort((a, b) => b[1] - a[1])
-.forEach(([key, total]) => {
-const [user, emoji] = key.split("_");
-const p = document.createElement("p");
-p.textContent = `${user} ${emoji} : ${total}`;
-resultsDiv.appendChild(p);
-});
-}
-
-
-if (sessionStorage.getItem("qm_logged")) {
-showApp();
-}
-});});
-
-
-const resultsDiv = document.getElementById("results");
-resultsDiv.innerHTML = "";
-
-
-Object.entries(count)
-.sort((a, b) => b[1] - a[1])
-.forEach(([key, total]) => {
-const [user, emoji] = key.split("_");
-const p = document.createElement("p");
-p.textContent = `${user} ${emoji} : ${total}`;
-resultsDiv.appendChild(p);
-});
-}
-
-
-if (sessionStorage.getItem("qm_logged")) {
-showApp();
-}
-});      "🐶","🐱","🐸","🐼","🦊","🐵","🦁","🐯","🐨","🐷","🐮","🐔"
-    ];
-
-    users.forEach(u => {
+  function renderUsers() {
+    const users = Object.keys(db.getUsers());
+    elements.userList.innerHTML = "";
+
+    users.forEach(user => {
       const div = document.createElement("div");
-      div.className = "user";
-
-      const span = document.createElement("span");
-      span.textContent = u;
-
-      const emojiContainer = document.createElement("div");
-
-      emojis.forEach(e => {
-        const btn = document.createElement("button");
-        btn.textContent = e;
-        btn.className = "emoji-btn";
-        btn.addEventListener("click", () => vote(u, e));
-        emojiContainer.appendChild(btn);
-      });
-
-      div.appendChild(span);
-      div.appendChild(emojiContainer);
-      list.appendChild(div);
+      div.className = "user-item"; // Ajustado para facilitar CSS futuro
+      div.innerHTML = `
+        <span>${user}</span>
+        <button class="emoji-btn" data-user="${user}">❤️</button>
+      `;
+      
+      div.querySelector('button').onclick = () => castVote(user);
+      elements.userList.appendChild(div);
     });
   }
 
-  function vote(target, emoji)(target) {
-    const username = sessionStorage.getItem("qm_logged");
-    if (!username) return;
+  function castVote(target) {
+    const voter = sessionStorage.getItem("qm_logged");
+    if (!voter) return;
 
-    const votes = getVotes();
-    if (!votes[TODAY]) votes[TODAY] = {};
+    const allVotes = db.getVotes();
+    if (!allVotes[TODAY]) allVotes[TODAY] = {};
 
-    // impede voto duplicado
-    if (votes[TODAY][username]) return;
+    // Validação de voto único por dia
+    if (allVotes[TODAY][voter]) {
+      console.warn("Usuário já votou hoje.");
+      return;
+    }
 
-    votes[TODAY][username] = target;
-    saveVotes(votes);
-
+    allVotes[TODAY][voter] = target;
+    db.saveVotes(allVotes);
     renderResults();
   }
 
   function renderResults() {
-    const votes = getVotes()[TODAY] || {};
-    const count = {};
+    const dayVotes = db.getVotes()[TODAY] || {};
+    const tally = {};
 
-    Object.values(votes).forEach(v => {
-      count[v] = (count[v] || 0) + 1;
+    Object.values(dayVotes).forEach(target => {
+      tally[target] = (tally[target] || 0) + 1;
     });
 
-    const resultsDiv = document.getElementById("results");
-    resultsDiv.innerHTML = "";
-
-    Object.entries(count)
+    elements.resultsDiv.innerHTML = "";
+    Object.entries(tally)
       .sort((a, b) => b[1] - a[1])
-      .forEach(([user, total]) => {
+      .forEach(([user, count]) => {
         const p = document.createElement("p");
-        p.textContent = `${user}: ${total} ❤️`;
-        resultsDiv.appendChild(p);
+        p.className = "result-line";
+        p.innerHTML = `<strong>${user}</strong>: ${count} ❤️`;
+        elements.resultsDiv.appendChild(p);
       });
   }
 
+  // --- HANDLERS ---
+
+  elements.loginBtn.addEventListener("click", () => {
+    const user = elements.usernameInput.value.trim();
+    const pass = elements.passwordInput.value.trim();
+
+    if (!user || pass.length !== 1) {
+      elements.loginError.textContent = "Dados inválidos (Senha deve ter 1 caractere).";
+      return;
+    }
+
+    const users = db.getUsers();
+
+    // Lógica de Registro/Login Automático
+    if (!users[user]) {
+      users[user] = pass;
+      db.saveUsers(users);
+    } else if (users[user] !== pass) {
+      elements.loginError.textContent = "Senha incorreta para este usuário.";
+      return;
+    }
+
+    sessionStorage.setItem("qm_logged", user);
+    showApp();
+  });
+
+  // --- INITIAL CHECK ---
   if (sessionStorage.getItem("qm_logged")) {
     showApp();
   }
-});renderResults();
-}
-
-
-loginBtn.addEventListener("click", () => {
-const username = document.getElementById("username").value.trim();
-const password = document.getElementById("password").value.trim();
-
-
-loginError.textContent = "";
-
-
-if (!username || password.length !== 1) {
-loginError.textContent = "Usuário inválido ou senha precisa ter 1 caractere.";
-return;
-}
-
-
-const users = getUsers();
-
-
-// criação única de usuário
-if (!users[username]) {
-users[username] = password;
-saveUsers(users);
-} else if (users[username] !== password) {
-loginError.textContent = "Senha incorreta.";
-return;
-}
-
-
-sessionStorage.setItem("qm_logged", username);
-showApp();
-});
-
-
-function renderUsers() {
-const users = Object.keys(getUsers());
-const list = document.getElementById("users");
-list.innerHTML = "";
-
-
-users.forEach(u => {
-const div = document.createElement("div");
-div.className = "user";
-
-
-const span = document.createElement("span");
-span.textContent = u;
-
-
-const btn = document.createElement("button");
-btn.textContent = "❤️";
-btn.className = "emoji-btn";
-
-
-btn.addEventListener("click", () => vote(u));
-
-
-div.appendChild(span);
-div.appendChild(btn);
-list.appendChild(div);
-});
-}
-
-
-function vote(target) {
-const username = sessionStorage.getItem("qm_logged");
-if (!username) return;
-
-
-const votes = getVotes();
-if (!votes[TODAY]) votes[TODAY] = {};
-
-
-// impede voto duplicado
-if (votes[TODAY][username]) return;
-
-
-votes[TODAY][username] = target;
-saveVotes(votes);
-
-
-renderResults();
-}
-
-
-function renderResults() {
-const votes = getVotes()[TODAY] || {};
-const count = {};
-
-
-Object.values(votes).forEach(v => {
-count[v] = (count[v] || 0) + 1;
-});
-
-
-const resultsDiv = document.getElementById("results");
-resultsDiv.innerHTML = "";
-
-
-Object.entries(count)
-.sort((a, b) => b[1] - a[1])
-.forEach(([user, total]) => {
-const p = document.createElement("p");
-p.textContent = `${user}: ${total} ❤️`;
-resultsDiv.appendChild(p);
-});
-}
-
-
-if (sessionStorage.getItem("qm_logged")) {
-showApp();
-}
 });

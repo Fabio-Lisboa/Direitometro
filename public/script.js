@@ -1,28 +1,58 @@
-alert("SCRIPT NOVO FUNCIONANDO");
+// Constantes globais
+const TODAY = new Date().toISOString().split('T')[0];
 
-document.getElementById("loginBtn").onclick = function () {
-  alert("BOTÃO OK");
-};
-};
-    }
+// Helpers para LocalStorage
+const getUsers = () => JSON.parse(localStorage.getItem("qm_users") || "{}");
+const saveUsers = (users) => localStorage.setItem("qm_users", JSON.stringify(users));
+const getVotes = () => JSON.parse(localStorage.getItem("qm_votes") || "{}");
+const saveVotes = (votes) => localStorage.setItem("qm_votes", JSON.stringify(votes));
 
-    sessionStorage.setItem("qm_logged", username);
-    showApp();
-  });
+// Seleção de elementos
+const loginDiv = document.getElementById("login");
+const appDiv = document.getElementById("app");
+const loginBtn = document.getElementById("loginBtn");
+const loginError = document.getElementById("loginError");
 
-  // mantém login ao recarregar
-  if (sessionStorage.getItem("qm_logged")) {
-    showApp();
+// --- FUNÇÕES DE NAVEGAÇÃO ---
+function showApp() {
+  loginDiv.classList.add("hidden");
+  appDiv.classList.remove("hidden");
+  renderUsers();
+  renderResults();
+}
+
+// --- LOGIN ---
+loginBtn.addEventListener("click", () => {
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  loginError.textContent = "";
+
+  if (!username || password.length !== 1) {
+    loginError.textContent = "Usuário inválido ou senha precisa ter 1 caractere.";
+    return;
   }
+
+  const users = getUsers();
+
+  // Cadastro simples ou verificação
+  if (!users[username]) {
+    users[username] = password;
+    saveUsers(users);
+  } else if (users[username] !== password) {
+    loginError.textContent = "Senha incorreta.";
+    return;
+  }
+
+  sessionStorage.setItem("qm_logged", username);
+  showApp();
 });
 
-// ================= USUÁRIOS =================
+// --- RENDERIZAR USUÁRIOS ---
 function renderUsers() {
   const users = Object.keys(getUsers());
   const list = document.getElementById("users");
   list.innerHTML = "";
-
-  const emojis = ["❤️","😂","😍","😎","😭","😡","👏","🔥","🎉","🏆","🍕","🐶"];
 
   users.forEach(u => {
     const div = document.createElement("div");
@@ -31,10 +61,63 @@ function renderUsers() {
     const span = document.createElement("span");
     span.textContent = u;
 
-    const emojiContainer = document.createElement("div");
+    const btn = document.createElement("button");
+    btn.textContent = "❤️";
+    btn.className = "emoji-btn";
+    btn.onclick = () => vote(u);
 
-    emojis.forEach(e => {
-      const btn = document.createElement("button");
+    div.appendChild(span);
+    div.appendChild(btn);
+    list.appendChild(div);
+  });
+}
+
+// --- SISTEMA DE VOTO ---
+function vote(target) {
+  const currentUser = sessionStorage.getItem("qm_logged");
+  if (!currentUser) return;
+
+  const votes = getVotes();
+  if (!votes[TODAY]) votes[TODAY] = {};
+
+  // Impede voto duplicado no mesmo dia
+  if (votes[TODAY][currentUser]) {
+    alert("Você já votou hoje!");
+    return;
+  }
+
+  votes[TODAY][currentUser] = target;
+  saveVotes(votes);
+  renderResults();
+}
+
+// --- RESULTADOS ---
+function renderResults() {
+  const votes = getVotes()[TODAY] || {};
+  const count = {};
+
+  Object.values(votes).forEach(target => {
+    count[target] = (count[target] || 0) + 1;
+  });
+
+  const resultsDiv = document.getElementById("results");
+  resultsDiv.innerHTML = "";
+
+  Object.entries(count)
+    .sort((a, b) => b[1] - a[1])
+    .forEach(([user, total]) => {
+      const p = document.createElement("p");
+      p.textContent = `${user}: ${total} ❤️`;
+      resultsDiv.appendChild(p);
+    });
+}
+
+// Verifica login ao carregar a página
+window.onload = () => {
+  if (sessionStorage.getItem("qm_logged")) {
+    showApp();
+  }
+};      const btn = document.createElement("button");
       btn.textContent = e;
       btn.className = "emoji-btn";
       btn.addEventListener("click", () => vote(u, e));

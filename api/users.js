@@ -1,4 +1,6 @@
+import db from "./_db.js";
+
+
 export default function handler(req, res) {
-const users = ["Ana", "Bruno", "Carlos", "Duda"];
-res.status(200).json(users);
+res.status(200).json(Object.keys(db.users));
 }

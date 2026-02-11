@@ -1,74 +1,8 @@
-const USERS_KEY = "qm_users";
-const MAX_USERS = 10;
+alert("SCRIPT NOVO FUNCIONANDO");
 
-window.onload = function () {
-  const loginBtn = document.getElementById("loginBtn");
-  const loginError = document.getElementById("loginError");
-  const loginDiv = document.getElementById("login");
-  const appDiv = document.getElementById("app");
-
-  function getUsers() {
-    return JSON.parse(localStorage.getItem(USERS_KEY) || "{}");
-  }
-
-  function saveUsers(users) {
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
-  }
-
-  function showApp() {
-    loginDiv.classList.add("hidden");
-    appDiv.classList.remove("hidden");
-  }
-
-  loginBtn.onclick = function () {
-    const username = document.getElementById("username").value.trim();
-    const password = document.getElementById("password").value.trim();
-
-    loginError.textContent = "";
-
-    if (!username || password.length !== 1) {
-      loginError.textContent = "Digite usuário e senha de 1 caractere.";
-      return;
-    }
-
-    const users = getUsers();
-
-    // limite de 10 usuários
-    if (!users[username] && Object.keys(users).length >= MAX_USERS) {
-      loginError.textContent = "Máximo de 10 usuários atingido.";
-      return;
-    }
-
-    // usuário já existe com outra senha
-    if (users[username] && users[username] !== password) {
-      loginError.textContent = "Senha incorreta.";
-      return;
-    }
-
-    // senha (caractere) já usada por outro usuário
-    const passwordInUse = Object.entries(users).some(
-      ([u, p]) => p === password && u !== username
-    );
-
-    if (!users[username] && passwordInUse) {
-      loginError.textContent = "Esse caractere já está em uso.";
-      return;
-    }
-
-    // cria usuário se não existir
-    if (!users[username]) {
-      users[username] = password;
-      saveUsers(users);
-    }
-
-    sessionStorage.setItem("qm_logged", username);
-    showApp();
-  };
-
-  // mantém logado após recarregar
-  if (sessionStorage.getItem("qm_logged")) {
-    showApp();
-  }
+document.getElementById("loginBtn").onclick = function () {
+  alert("BOTÃO OK");
+};
 };
     }
 

@@ -1,53 +1,38 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Direitômetro</title>
-<link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Direitômetro</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
+  <div class="container">
 
-<div class="container">
+    <!-- LOGIN -->
+    <div id="login" class="card">
+      <h1>Direitômetro</h1>
 
+      <input id="username" placeholder="Usuário" />
+      <input id="password" maxlength="1" placeholder="Senha (1 caractere)" />
 
-<!-- LOGIN -->
-<div id="login" class="card">
-<h1>Direitômetro</h1>
+      <button id="loginBtn" type="button">Entrar</button>
 
+      <p id="loginError" class="error"></p>
+    </div>
 
-<input id="username" placeholder="Usuário" />
-<input id="password" maxlength="1" placeholder="Senha (1 caractere)" />
+    <!-- APP -->
+    <div id="app" class="card hidden">
+      <h2>Escolha alguém</h2>
+      <div id="users" class="user-list"></div>
 
+      <h2>Resultados do dia</h2>
+      <div id="results"></div>
+    </div>
 
-<!-- IMPORTANTE: type="button" evita recarregar a página -->
-<button id="loginBtn" type="button">Entrar</button>
+  </div>
 
-
-<p id="loginError" class="error"></p>
-</div>
-
-
-<!-- APP -->
-<div id="app" class="card hidden">
-<h2>Escolha alguém</h2>
-<div id="users" class="user-list"></div>
-
-
-<h2>Resultados do dia</h2>
-<div id="results"></div>
-</div>
-
-
-<script src="script.js"></script>
-</body>
-</html></div>
-
-
-</div>
-
-
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>

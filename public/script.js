@@ -1,6 +1,4 @@
 const USERS_KEY = "qm_users";
-const VOTES_KEY = "qm_votes";
-const TODAY = new Date().toISOString().slice(0, 10);
 const MAX_USERS = 10;
 
 
@@ -9,12 +7,6 @@ const loginDiv = document.getElementById("login");
 const appDiv = document.getElementById("app");
 const loginBtn = document.getElementById("loginBtn");
 const loginError = document.getElementById("loginError");
-
-
-if (!loginBtn) {
-alert("ERRO: botão de login não encontrado no HTML");
-return;
-}
 
 
 function getUsers() {
@@ -28,12 +20,13 @@ localStorage.setItem(USERS_KEY, JSON.stringify(users));
 
 
 function showApp() {
-loginDiv.style.display = "none";
-appDiv.style.display = "block";
+loginDiv.classList.add("hidden");
+appDiv.classList.remove("hidden");
 }
 
 
-loginBtn.onclick = function () {
+// LOGIN SIMPLES E À PROVA DE ERRO
+loginBtn.addEventListener("click", () => {
 const username = document.getElementById("username").value.trim();
 const password = document.getElementById("password").value.trim();
 
@@ -70,6 +63,19 @@ const passwordInUse = Object.entries(users).some(
 if (passwordInUse) {
 loginError.textContent = "Esse caractere já está em uso.";
 return;
+}
+
+
+if (!users[username]) {
+users[username] = password;
+saveUsers(users);
+}
+
+
+sessionStorage.setItem("qm_logged", username);
+showApp();
+});
+});return;
 }
 
 

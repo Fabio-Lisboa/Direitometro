@@ -1,4 +1,51 @@
 const USERS_KEY = "qm_users";
+}
+
+
+const users = getUsers();
+
+
+// limite de usuários
+if (!users[username] && Object.keys(users).length >= MAX_USERS) {
+loginError.textContent = "Limite máximo de 10 usuários atingido.";
+return;
+}
+
+
+// usuário já existe → erro (não cria de novo)
+if (users[username] && users[username] !== password) {
+loginError.textContent = "Usuário já existe com outra senha.";
+return;
+}
+
+
+// senha já usada por outro colega → erro
+const passwordInUse = Object.entries(users).some(
+([u, p]) => p === password && u !== username
+);
+
+
+if (passwordInUse) {
+loginError.textContent = "Esse caractere já está sendo usado por outro usuário.";
+return;
+}
+
+
+// cria usuário se não existir
+if (!users[username]) {
+users[username] = password;
+saveUsers(users);
+}
+
+
+sessionStorage.setItem("qm_logged", username);
+showApp();
+});
+
+
+function renderUsers() {
+const users = Object.keys(getUsers());
+const list = document.getElementById("users");
 list.innerHTML = "";
 
 
@@ -70,6 +117,27 @@ Object.values(votes).forEach(v => {
 const key = `${v.target}_${v.emoji}`;
 count[key] = (count[key] || 0) + 1;
 });
+
+
+const resultsDiv = document.getElementById("results");
+resultsDiv.innerHTML = "";
+
+
+Object.entries(count)
+.sort((a, b) => b[1] - a[1])
+.forEach(([key, total]) => {
+const [user, emoji] = key.split("_");
+const p = document.createElement("p");
+p.textContent = `${user} ${emoji} : ${total}`;
+resultsDiv.appendChild(p);
+});
+}
+
+
+if (sessionStorage.getItem("qm_logged")) {
+showApp();
+}
+});});
 
 
 const resultsDiv = document.getElementById("results");

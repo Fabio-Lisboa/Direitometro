@@ -1,23 +1,4 @@
-createElement("div");
-div.className const USERS_KEY = "qm_users";
-const VOTES_KEY = "qm_votes";
-const TODAY = new Date().toISOString().slice(0, 10);
-
-
-const loginDiv = document.getElementById("login");
-const appDiv = document.getElementById("app");
-const loginBtn = document.getElementById("loginBtn");
-const loginError = document.getElementById("loginError");
-
-
-function getUsers() {
-return JSON.parse(localStorage.getItem(USERS_KEY) || "{}");
-}
-
-
-function saveUsers(users) {
-localStorage.setItem(USERS_KEY, JSON.stringify(users));
-}
+const USERS_KEY = "qm_users";
 
 
 function getVotes() {
@@ -30,7 +11,7 @@ localStorage.setItem(VOTES_KEY, JSON.stringify(votes));
 }
 
 
-loginBtn.onclick = () => {
+loginBtn.addEventListener("click", () => {
 const username = document.getElementById("username").value.trim();
 const password = document.getElementById("password").value.trim();
 
@@ -55,34 +36,8 @@ return;
 
 sessionStorage.setItem("qm_logged", username);
 showApp();
-};async function vote(to, emoji) {
-await fetch("/api/vote", {
-method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({ from: currentUser, to, emoji })
 });
 
-
-loadResults();
-}
-
-
-async function loadResults() {
-const res = await fetch("/api/results");
-const data = await res.json();
-
-
-const container = document.getElementById("results");
-container.innerHTML = Object.entries(data)
-.map(([user, votes]) => `${user}: ${votes.map(v => v.emoji).join(" ")}`)
-.join("<br>");
-}container.innerHTML = Object.entries(data)
-.map(([user, votes]) => `${user}: ${votes.map(v => v.emoji).join(" ")}`)
-.join("<br>");
-}
-
-
-loadUsers();
 
 function showApp() {
 loginDiv.classList.add("hidden");
@@ -99,7 +54,8 @@ list.innerHTML = "";
 
 
 users.forEach(u => {
-const div = document.= "user";
+const div = document.createElement("div");
+div.className = "user";
 
 
 const span = document.createElement("span");
@@ -111,7 +67,7 @@ btn.textContent = "❤️";
 btn.className = "emoji-btn";
 
 
-btn.onclick = () => vote(u);
+btn.addEventListener("click", () => vote(u));
 
 
 div.appendChild(span);
@@ -136,6 +92,7 @@ saveVotes(votes);
 
 renderResults();
 }
+
 
 function renderResults() {
 const votes = getVotes()[TODAY] || {};
@@ -164,3 +121,4 @@ resultsDiv.appendChild(p);
 if (sessionStorage.getItem("qm_logged")) {
 showApp();
 }
+});

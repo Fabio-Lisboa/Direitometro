@@ -1,40 +1,88 @@
 const USERS_KEY = "qm_users";
+const VOTES_KEY = "qm_votes";
+const TODAY = new Date().toISOString().slice(0, 10);
+const MAX_USERS = 10;
+
+
+window.addEventListener("DOMContentLoaded", () => {
+const loginDiv = document.getElementById("login");
+const appDiv = document.getElementById("app");
+const loginBtn = document.getElementById("loginBtn");
+const loginError = document.getElementById("loginError");
+
+
+if (!loginBtn) {
+alert("ERRO: botão de login não encontrado no HTML");
+return;
+}
+
+
+function getUsers() {
+return JSON.parse(localStorage.getItem(USERS_KEY) || "{}");
+}
+
+
+function saveUsers(users) {
+localStorage.setItem(USERS_KEY, JSON.stringify(users));
+}
+
+
+function showApp() {
+loginDiv.style.display = "none";
+appDiv.style.display = "block";
+}
+
+
+loginBtn.onclick = function () {
+const username = document.getElementById("username").value.trim();
+const password = document.getElementById("password").value.trim();
+
+
+loginError.textContent = "";
+
+
+if (!username || password.length !== 1) {
+loginError.textContent = "Digite usuário e senha de 1 caractere.";
+return;
 }
 
 
 const users = getUsers();
 
 
-// limite de usuários
 if (!users[username] && Object.keys(users).length >= MAX_USERS) {
-loginError.textContent = "Limite máximo de 10 usuários atingido.";
+loginError.textContent = "Máximo de 10 usuários atingido.";
 return;
 }
 
 
-// usuário já existe → erro (não cria de novo)
 if (users[username] && users[username] !== password) {
 loginError.textContent = "Usuário já existe com outra senha.";
 return;
 }
 
 
-// senha já usada por outro colega → erro
 const passwordInUse = Object.entries(users).some(
 ([u, p]) => p === password && u !== username
 );
 
 
 if (passwordInUse) {
-loginError.textContent = "Esse caractere já está sendo usado por outro usuário.";
+loginError.textContent = "Esse caractere já está em uso.";
 return;
 }
 
 
-// cria usuário se não existir
 if (!users[username]) {
 users[username] = password;
 saveUsers(users);
+}
+
+
+sessionStorage.setItem("qm_logged", username);
+showApp();
+};
+});saveUsers(users);
 }
 
 

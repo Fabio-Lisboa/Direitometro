@@ -11,6 +11,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Elementos DOM
   const el = {
+    header: {
+      bar: document.getElementById("app-header"),
+      msg: document.getElementById("welcome-msg"),
+      btn: document.getElementById("settings-btn")
+    },
     login: {
       card: document.getElementById("login"),
       btn: document.getElementById("loginBtn"),
@@ -25,13 +30,22 @@ document.addEventListener("DOMContentLoaded", () => {
     },
     results: {
       card: document.getElementById("results-area"),
-      list: document.getElementById("results-list")
+      list: document.getElementById("results-list"),
+      refreshBtn: document.getElementById("refresh-btn"),
+      logoutBtn: document.getElementById("logout-btn")
     },
     modal: {
       overlay: document.getElementById("emoji-modal"),
       title: document.getElementById("modal-title"),
       grid: document.getElementById("emoji-grid"),
       close: document.getElementById("close-modal")
+    },
+    settings: {
+      overlay: document.getElementById("settings-modal"),
+      newPass: document.getElementById("new-password"),
+      saveBtn: document.getElementById("save-pass-btn"),
+      deleteBtn: document.getElementById("delete-account-btn"),
+      closeBtn: document.getElementById("close-settings")
     }
   };
 
@@ -41,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const db = {
     getUsers: () => JSON.parse(localStorage.getItem("qm_users") || "{}"),
     saveUsers: (u) => localStorage.setItem("qm_users", JSON.stringify(u)),
-    getVotes: () => JSON.parse(localStorage.getItem("qm_votes_v3") || "{}"), // Mudei para v3 para limpar dados corrompidos
+    getVotes: () => JSON.parse(localStorage.getItem("qm_votes_v3") || "{}"), 
     saveVotes: (v) => localStorage.setItem("qm_votes_v3", JSON.stringify(v))
   };
 
@@ -60,15 +74,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const users = db.getUsers();
 
     if (users[user]) {
-      // Usuário existe, verifica senha
       if (users[user] !== pass) {
         el.login.error.textContent = "Senha incorreta.";
         return;
       }
     } else {
-      // Usuário novo, verifica se senha (caractere) já está em uso
       if (Object.values(users).includes(pass)) {
-        el.login.error.textContent = "Este caractere já é a senha de outra pessoa.";
+        el.login.error.textContent = "Caractere já em uso por outra pessoa.";
         return;
       }
       users[user] = pass;
@@ -82,25 +94,30 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- 2. INICIALIZAÇÃO ---
   function initApp() {
     const user = sessionStorage.getItem("qm_logged");
-    if (!user) return;
+    if (!user) {
+      el.header.bar.classList.add("hidden");
+      return;
+    }
 
     el.login.card.classList.add("hidden");
+    el.header.bar.classList.remove("hidden");
+    el.header.msg.textContent = `Olá, ${user}`;
+    
     checkVotingStatus();
   }
 
   // --- 3. FLUXO DE VOTAÇÃO ---
   function checkVotingStatus() {
     const currentUser = sessionStorage.getItem("qm_logged");
+    if(!currentUser) return; // Segurança extra
+
     const allUsers = Object.keys(db.getUsers());
     const votes = db.getVotes();
     
-    // Garante estrutura básica
     if (!votes[TODAY]) votes[TODAY] = {};
     if (!votes[TODAY][currentUser]) votes[TODAY][currentUser] = {};
 
     const myVotes = votes[TODAY][currentUser];
-    
-    // Lista de quem falta votar (exclui eu mesmo e quem já votei)
     const toVote = allUsers.filter(u => u !== currentUser && !myVotes[u]);
 
     if (toVote.length === 0) {
@@ -119,17 +136,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     pendingUsers.forEach(target => {
       const btn = document.createElement("button");
-      btn.className = "user-to-vote-btn"; // Classe estilizada no CSS
+      btn.className = "user-to-vote-btn"; 
       btn.innerHTML = `<span>Votar em <strong>${target}</strong></span> <span>👉</span>`;
-      
-      // Abre o modal ao clicar
       btn.onclick = () => openModal(target);
-      
       el.vote.list.appendChild(btn);
     });
   }
 
-  // --- 4. MODAL E AÇÃO DE VOTAR ---
+  // --- 4. MODAL EMOJI ---
   function openModal(targetName) {
     currentTargetUser = targetName;
     el.modal.title.textContent = `Defina ${targetName}:`;
@@ -138,59 +152,46 @@ document.addEventListener("DOMContentLoaded", () => {
     EMOJIS.forEach(emoji => {
       const btn = document.createElement("button");
       btn.textContent = emoji;
-      btn.className = "emoji-option"; // Classe estilizada no CSS
-      
-      // Aqui estava o erro potencial. Agora chamamos uma função segura.
+      btn.className = "emoji-option"; 
       btn.onclick = (e) => {
-        e.stopPropagation(); // Evita cliques duplos indesejados
+        e.stopPropagation(); 
         confirmVote(emoji);
       };
-      
       el.modal.grid.appendChild(btn);
     });
 
     el.modal.overlay.classList.remove("hidden");
   }
 
-  // Fecha modal ao clicar no botão de fechar ou fora do conteúdo
-  el.modal.close.onclick = closeModal;
-  
-  function closeModal() {
+  el.modal.close.onclick = () => {
     el.modal.overlay.classList.add("hidden");
     currentTargetUser = null;
   }
 
-  // CORREÇÃO PRINCIPAL AQUI
   function confirmVote(emoji) {
     if (!currentTargetUser) return;
-
     const currentUser = sessionStorage.getItem("qm_logged");
     const votes = db.getVotes();
 
-    // 1. Cria a data de hoje se não existir
     if (!votes[TODAY]) votes[TODAY] = {};
-
-    // 2. Cria o objeto do usuário atual se não existir
     if (!votes[TODAY][currentUser]) votes[TODAY][currentUser] = {};
 
-    // 3. Salva o voto com segurança
     votes[TODAY][currentUser][currentTargetUser] = emoji;
     db.saveVotes(votes);
 
-    // 4. Fecha e atualiza
-    closeModal();
+    el.modal.overlay.classList.add("hidden");
+    currentTargetUser = null;
     checkVotingStatus();
   }
 
-  // --- 5. RESULTADOS ---
+  // --- 5. RESULTADOS E BOTÕES ---
   function showResults() {
     el.vote.card.classList.add("hidden");
     el.results.card.classList.remove("hidden");
     
     const votesToday = db.getVotes()[TODAY] || {};
-    const summary = {}; // Vai guardar: { "Fulano": ["🔥", "❤️"] }
+    const summary = {}; 
 
-    // Agrega todos os votos recebidos
     Object.values(votesToday).forEach(userVotes => {
       Object.entries(userVotes).forEach(([target, emoji]) => {
         if (!summary[target]) summary[target] = [];
@@ -201,27 +202,24 @@ document.addEventListener("DOMContentLoaded", () => {
     el.results.list.innerHTML = "";
     const allUsers = Object.keys(db.getUsers());
 
-    // Se só tem 1 pessoa no sistema, avisa
     if (allUsers.length < 2) {
-      el.results.list.innerHTML = "<p>Convide mais amigos para começar a votação!</p>";
+      el.results.list.innerHTML = "<p>Convide mais amigos para começar!</p>";
       return;
     }
 
     allUsers.forEach(user => {
       const received = summary[user] || [];
       const div = document.createElement("div");
-      div.className = "result-item"; // Classe estilizada no CSS
+      div.className = "result-item"; 
       
       if (received.length === 0) {
         div.innerHTML = `<strong>${user}</strong>: Aguardando votos...`;
       } else {
-        // Conta a frequência dos emojis
         const counts = {};
         received.forEach(e => counts[e] = (counts[e] || 0) + 1);
         
-        // Formata para exibir
         const displayString = Object.entries(counts)
-          .sort((a, b) => b[1] - a[1]) // Ordena o emoji mais recebido primeiro
+          .sort((a, b) => b[1] - a[1]) 
           .map(([e, qtd]) => `${e} <small>x${qtd}</small>`)
           .join("&nbsp;&nbsp;");
 
@@ -231,7 +229,63 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Auto-login se der refresh
+  // AÇÕES FINAIS (REFRESH / LOGOUT)
+  el.results.refreshBtn.onclick = () => location.reload();
+  
+  el.results.logoutBtn.onclick = () => {
+    sessionStorage.removeItem("qm_logged");
+    location.reload();
+  };
+
+  // --- 6. CONFIGURAÇÕES DE PERFIL ---
+  el.header.btn.onclick = () => {
+    el.settings.overlay.classList.remove("hidden");
+  };
+
+  el.settings.closeBtn.onclick = () => {
+    el.settings.overlay.classList.add("hidden");
+  };
+
+  // Alterar Senha
+  el.settings.saveBtn.onclick = () => {
+    const currentUser = sessionStorage.getItem("qm_logged");
+    const newPass = el.settings.newPass.value.trim();
+    const users = db.getUsers();
+
+    if (newPass.length !== 1) {
+      alert("A senha deve ter 1 caractere.");
+      return;
+    }
+
+    // Verifica se a nova senha já é usada por OUTRA pessoa
+    const passTaken = Object.entries(users).some(([u, p]) => p === newPass && u !== currentUser);
+    
+    if (passTaken) {
+      alert("Este caractere já está em uso.");
+      return;
+    }
+
+    users[currentUser] = newPass;
+    db.saveUsers(users);
+    alert("Senha alterada com sucesso!");
+    el.settings.newPass.value = "";
+    el.settings.overlay.classList.add("hidden");
+  };
+
+  // Excluir Conta
+  el.settings.deleteBtn.onclick = () => {
+    const currentUser = sessionStorage.getItem("qm_logged");
+    if (confirm(`Tem certeza que deseja excluir a conta de ${currentUser}? Isso não pode ser desfeito.`)) {
+      const users = db.getUsers();
+      delete users[currentUser];
+      db.saveUsers(users);
+      
+      sessionStorage.removeItem("qm_logged");
+      location.reload();
+    }
+  };
+
+  // Auto-login
   if (sessionStorage.getItem("qm_logged")) {
     initApp();
   }

@@ -1,74 +1,156 @@
 const USERS_KEY = "qm_users";
+const VOTES_KEY = "qm_votes";
 const MAX_USERS = 10;
 
-
-window.addEventListener("DOMContentLoaded", () => {
-const loginDiv = document.getElementById("login");
-const appDiv = document.getElementById("app");
-const loginBtn = document.getElementById("loginBtn");
-const loginError = document.getElementById("loginError");
-
+const TODAY = new Date().toISOString().slice(0, 10);
 
 function getUsers() {
-return JSON.parse(localStorage.getItem(USERS_KEY) || "{}");
+  return JSON.parse(localStorage.getItem(USERS_KEY) || "{}");
 }
-
 
 function saveUsers(users) {
-localStorage.setItem(USERS_KEY, JSON.stringify(users));
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
 }
 
-
-function showApp() {
-loginDiv.classList.add("hidden");
-appDiv.classList.remove("hidden");
+function getVotes() {
+  return JSON.parse(localStorage.getItem(VOTES_KEY) || "{}");
 }
 
-
-// LOGIN SIMPLES E À PROVA DE ERRO
-loginBtn.addEventListener("click", () => {
-const username = document.getElementById("username").value.trim();
-const password = document.getElementById("password").value.trim();
-
-
-loginError.textContent = "";
-
-
-if (!username || password.length !== 1) {
-loginError.textContent = "Digite usuário e senha de 1 caractere.";
-return;
+function saveVotes(votes) {
+  localStorage.setItem(VOTES_KEY, JSON.stringify(votes));
 }
 
+window.addEventListener("DOMContentLoaded", () => {
+  const loginDiv = document.getElementById("login");
+  const appDiv = document.getElementById("app");
+  const loginBtn = document.getElementById("loginBtn");
+  const loginError = document.getElementById("loginError");
 
-const users = getUsers();
+  function showApp() {
+    loginDiv.classList.add("hidden");
+    appDiv.classList.remove("hidden");
+    renderUsers();
+    renderResults();
+  }
 
+  // ================= LOGIN =================
+  loginBtn.addEventListener("click", () => {
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
 
-if (!users[username] && Object.keys(users).length >= MAX_USERS) {
-loginError.textContent = "Máximo de 10 usuários atingido.";
-return;
+    loginError.textContent = "";
+
+    if (!username || password.length !== 1) {
+      loginError.textContent = "Digite usuário e senha de 1 caractere.";
+      return;
+    }
+
+    const users = getUsers();
+
+    if (!users[username] && Object.keys(users).length >= MAX_USERS) {
+      loginError.textContent = "Máximo de 10 usuários atingido.";
+      return;
+    }
+
+    if (users[username] && users[username] !== password) {
+      loginError.textContent = "Senha incorreta.";
+      return;
+    }
+
+    const passwordInUse = Object.entries(users).some(
+      ([u, p]) => p === password && u !== username
+    );
+
+    if (!users[username] && passwordInUse) {
+      loginError.textContent = "Esse caractere já está em uso.";
+      return;
+    }
+
+    if (!users[username]) {
+      users[username] = password;
+      saveUsers(users);
+    }
+
+    sessionStorage.setItem("qm_logged", username);
+    showApp();
+  });
+
+  // mantém login ao recarregar
+  if (sessionStorage.getItem("qm_logged")) {
+    showApp();
+  }
+});
+
+// ================= USUÁRIOS =================
+function renderUsers() {
+  const users = Object.keys(getUsers());
+  const list = document.getElementById("users");
+  list.innerHTML = "";
+
+  const emojis = ["❤️","😂","😍","😎","😭","😡","👏","🔥","🎉","🏆","🍕","🐶"];
+
+  users.forEach(u => {
+    const div = document.createElement("div");
+    div.className = "user";
+
+    const span = document.createElement("span");
+    span.textContent = u;
+
+    const emojiContainer = document.createElement("div");
+
+    emojis.forEach(e => {
+      const btn = document.createElement("button");
+      btn.textContent = e;
+      btn.className = "emoji-btn";
+      btn.addEventListener("click", () => vote(u, e));
+      emojiContainer.appendChild(btn);
+    });
+
+    div.appendChild(span);
+    div.appendChild(emojiContainer);
+    list.appendChild(div);
+  });
 }
 
+// ================= VOTO =================
+function vote(target, emoji) {
+  const username = sessionStorage.getItem("qm_logged");
+  if (!username) return;
 
-if (users[username] && users[username] !== password) {
-loginError.textContent = "Usuário já existe com outra senha.";
-return;
+  const votes = getVotes();
+  if (!votes[TODAY]) votes[TODAY] = {};
+
+  // impede voto duplicado no dia
+  if (votes[TODAY][username]) return;
+
+  votes[TODAY][username] = { target, emoji };
+  saveVotes(votes);
+
+  renderResults();
 }
 
+// ================= RESULTADOS =================
+function renderResults() {
+  const votes = getVotes()[TODAY] || {};
+  const count = {};
 
-const passwordInUse = Object.entries(users).some(
-([u, p]) => p === password && u !== username
-);
+  Object.values(votes).forEach(v => {
+    const key = `${v.target}_${v.emoji}`;
+    count[key] = (count[key] || 0) + 1;
+  });
 
+  const resultsDiv = document.getElementById("results");
+  resultsDiv.innerHTML = "";
 
-if (passwordInUse) {
-loginError.textContent = "Esse caractere já está em uso.";
-return;
+  Object.entries(count)
+    .sort((a, b) => b[1] - a[1])
+    .forEach(([key, total]) => {
+      const [user, emoji] = key.split("_");
+      const p = document.createElement("p");
+      p.textContent = `${user} ${emoji} : ${total}`;
+      resultsDiv.appendChild(p);
+    });
 }
-
-
-if (!users[username]) {
-users[username] = password;
-saveUsers(users);
 }
 
 

@@ -1,4 +1,4 @@
-*{
+* {
 box-sizing: border-box;
 font-family: Arial, sans-serif;
 }
@@ -70,6 +70,28 @@ gap: 10px;
 }
 
 
+.user {
+display: flex;
+justify-content: space-between;
+align-items: center;
+background: #f3f4f6;
+padding: 10px 12px;
+border-radius: 10px;
+}
+
+
+.emoji-btn {
+font-size: 22px;
+cursor: pointer;
+background: none;
+}
+
+
+.error {
+color: red;
+font-size: 14px;
+min-height: 18px;
+}
 .user {
 display: flex;
 justify-content: space-between;

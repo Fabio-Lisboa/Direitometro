@@ -1,116 +1,223 @@
+/* =========================================
+   BASE & LAYOUT (Preservando sua identidade)
+   ========================================= */
 * {
-box-sizing: border-box;
-font-family: Arial, sans-serif;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
 }
-
 
 body {
-margin: 0;
-background: linear-gradient(135deg, #667eea, #764ba2);
-min-height: 100vh;
-display: flex;
-justify-content: center;
-align-items: center;
+  margin: 0;
+  background: linear-gradient(135deg, #667eea, #764ba2); /* Seu gradiente original */
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
-
 
 .container {
-width: 100%;
-max-width: 420px;
-padding: 16px;
+  width: 100%;
+  max-width: 420px;
+  padding: 16px;
 }
-
 
 .card {
-background: white;
-border-radius: 16px;
-padding: 24px;
-box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-display: flex;
-flex-direction: column;
-gap: 12px;
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  transition: height 0.3s ease;
 }
 
-
+/* Utilitários */
 .hidden {
-display: none;
+  display: none !important;
 }
 
+.error {
+  color: #e53e3e;
+  font-size: 14px;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* =========================================
+   ELEMENTOS DE INTERFACE
+   ========================================= */
+
+/* Inputs do Login */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
 input {
-padding: 12px;
-border-radius: 10px;
-border: 1px solid #ddd;
-font-size: 16px;
-width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+  width: 100%;
+  outline: none;
+  transition: border 0.2s;
 }
 
+input:focus {
+  border-color: #667eea;
+}
 
+/* Botões Principais */
 button {
-padding: 12px;
-border: none;
-border-radius: 12px;
-background: #667eea;
-color: white;
-font-size: 16px;
-font-weight: bold;
-cursor: pointer;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: #667eea; /* Sua cor original */
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  transition: transform 0.1s, background 0.2s;
 }
-
 
 button:active {
-transform: scale(0.98);
+  transform: scale(0.98);
 }
 
+button:hover {
+  background: #5a67d8;
+}
 
+/* Botão Secundário (Cinza) */
+.secondary-btn {
+  background-color: #a0aec0;
+  margin-top: 10px;
+}
+
+/* Títulos e Textos */
+h1, h2 {
+  margin: 0;
+  text-align: center;
+  color: #2d3748;
+}
+
+.subtitle {
+  text-align: center;
+  color: #718096;
+  margin: -5px 0 10px 0;
+  font-size: 0.9rem;
+}
+
+/* =========================================
+   NOVO: LISTA DE VOTAÇÃO (Botões grandes)
+   ========================================= */
 .user-list {
-display: flex;
-flex-direction: column;
-gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-
-.user {
-display: flex;
-justify-content: space-between;
-align-items: center;
-background: #f3f4f6;
-padding: 10px 12px;
-border-radius: 10px;
+/* Estilo do botão "Votar em Fulano" */
+.user-to-vote-btn {
+  background: #f7fafc;
+  color: #4a5568;
+  border: 2px solid #edf2f7;
+  text-align: left;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-
-.emoji-btn {
-font-size: 22px;
-cursor: pointer;
-background: none;
+.user-to-vote-btn:hover {
+  border-color: #667eea;
+  color: #667eea;
+  background: #fff;
 }
 
-
-.error {
-color: red;
-font-size: 14px;
-min-height: 18px;
-}
-.user {
-display: flex;
-justify-content: space-between;
-align-items: center;
-background: #f3f4f6;
-padding: 10px 12px;
-border-radius: 10px;
-}
-
-
-.emoji-btn {
-font-size: 22px;
-cursor: pointer;
-background: none;
+/* =========================================
+   NOVO: MODAL (Janela Pop-up de Emojis)
+   ========================================= */
+.modal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.6); /* Fundo escuro transparente */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px); /* Desfoque suave no fundo */
 }
 
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 380px;
+  max-height: 85vh; /* Evita que estoure a tela no celular */
+  overflow-y: auto; /* Permite rolar se tiver muitos emojis */
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
 
-.error {
-color: red;
-font-size: 14px;
-min-height: 18px;
+/* Grade de 50 Emojis (5 por linha) */
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin: 15px 0;
+}
+
+/* Botão individual de Emoji dentro do Modal */
+.emoji-option {
+  background: #edf2f7;
+  font-size: 1.6rem; /* Emoji grande */
+  padding: 8px 0;
+  border-radius: 8px;
+  color: black;
+  transition: transform 0.2s;
+}
+
+.emoji-option:hover {
+  background: #e2e8f0;
+  transform: scale(1.15); /* Efeito de zoom */
+  z-index: 2;
+}
+
+/* Botão de fechar modal (dentro do modal) */
+#close-modal {
+  background: #e53e3e;
+  margin-top: 5px;
+}
+
+/* =========================================
+   RESULTADOS FINAIS
+   ========================================= */
+.result-item {
+  background: #f8fafc;
+  padding: 12px;
+  border-radius: 10px;
+  border-left: 4px solid #667eea;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #2d3748;
+}
+
+.result-item strong {
+  color: #553c9a;
+  font-weight: bold;
+}
+
+/* Animação suave de entrada do Modal */
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
 }

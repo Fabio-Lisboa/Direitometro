@@ -10,6 +10,11 @@
 
   <div class="container">
 
+    <div id="app-header" class="header-bar hidden">
+      <span id="welcome-msg">Olá, Usuário</span>
+      <button id="settings-btn" class="icon-btn">⚙️</button>
+    </div>
+
     <div id="login" class="card">
       <h1>Direitômetro ⚖️</h1>
       <p class="subtitle">Identifique-se para julgar.</p>
@@ -34,8 +39,13 @@
     <div id="results-area" class="card hidden">
       <h2>🏆 Veredito do Dia</h2>
       <p class="subtitle">Todos os votos foram computados.</p>
+      
       <div id="results-list"></div>
-      <button onclick="location.reload()" class="secondary-btn">Sair / Atualizar</button>
+
+      <div class="action-buttons">
+        <button id="refresh-btn" class="primary-btn">🔄 Atualizar Lista</button>
+        <button id="logout-btn" class="secondary-btn">❌ Sair</button>
+      </div>
     </div>
 
   </div>
@@ -44,7 +54,25 @@
     <div class="modal-content">
       <h3 id="modal-title">Escolha para Fulano:</h3>
       <div id="emoji-grid" class="emoji-grid"></div>
-      <button id="close-modal">Cancelar</button>
+      <button id="close-modal" class="danger-btn">Cancelar</button>
+    </div>
+  </div>
+
+  <div id="settings-modal" class="modal hidden">
+    <div class="modal-content">
+      <h3>Gerenciar Perfil</h3>
+      <p>O que deseja fazer?</p>
+      
+      <div class="input-group" style="margin-bottom: 15px;">
+        <label>Nova Senha (1 char):</label>
+        <input id="new-password" maxlength="1" placeholder="Nova senha..." />
+        <button id="save-pass-btn">💾 Salvar Nova Senha</button>
+      </div>
+
+      <hr style="width: 100%; border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+
+      <button id="delete-account-btn" class="danger-btn">🗑️ Excluir Minha Conta</button>
+      <button id="close-settings" class="secondary-btn" style="margin-top:10px">Fechar</button>
     </div>
   </div>
 

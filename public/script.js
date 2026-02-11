@@ -1,75 +1,61 @@
-let currentUser = null;
-const emojis = ["❤️", "😡", "😂", "😴", "🤡"];
+createElement("div");
+div.className const USERS_KEY = "qm_users";
+const VOTES_KEY = "qm_votes";
+const TODAY = new Date().toISOString().slice(0, 10);
 
 
-async function login() {
+const loginDiv = document.getElementById("login");
+const appDiv = document.getElementById("app");
+const loginBtn = document.getElementById("loginBtn");
+const loginError = document.getElementById("loginError");
+
+
+function getUsers() {
+return JSON.parse(localStorage.getItem(USERS_KEY) || "{}");
+}
+
+
+function saveUsers(users) {
+localStorage.setItem(USERS_KEY, JSON.stringify(users));
+}
+
+
+function getVotes() {
+return JSON.parse(localStorage.getItem(VOTES_KEY) || "{}");
+}
+
+
+function saveVotes(votes) {
+localStorage.setItem(VOTES_KEY, JSON.stringify(votes));
+}
+
+
+loginBtn.onclick = () => {
 const username = document.getElementById("username").value.trim();
 const password = document.getElementById("password").value.trim();
 
 
-if (!username || !password) {
-alert("Preencha usuário e senha");
+if (!username || password.length !== 1) {
+loginError.textContent = "Usuário inválido ou senha precisa ter 1 caractere.";
 return;
 }
 
 
-const res = await fetch("/api/login", {
-method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({ username, password })
-});
+const users = getUsers();
 
 
-const data = await res.json().catch(() => ({}));
-
-
-if (!res.ok) {
-alert(data.error || "Erro no login");
+if (!users[username]) {
+users[username] = password; // cria usuário novo
+saveUsers(users);
+} else if (users[username] !== password) {
+loginError.textContent = "Senha incorreta.";
 return;
 }
 
 
-currentUser = username;
-
-
-document.getElementById("login").style.display = "none";
-document.getElementById("app").style.display = "block";
-
-
-renderUsers();
-loadResults();
-}
-
-
-async function renderUsers() {
-const res = await fetch("/api/users");
-const users = await res.json();
-
-
-const container = document.getElementById("users");
-container.innerHTML = "";
-
-
-users.filter(u => u !== currentUser).forEach(user => {
-const div = document.createElement("div");
-div.className = "user";
-
-
-emojis.forEach(emoji => {
-const btn = document.createElement("button");
-btn.textContent = `${emoji} → ${user}`;
-btn.className = "emoji-btn";
-btn.onclick = () => vote(user, emoji);
-div.appendChild(btn);
-});
-
-
-container.appendChild(div);
-});
-}
-
-
-async function vote(to, emoji) {
+sessionStorage.setItem("qm_logged", username);
+showApp();
+};async function vote(to, emoji) {
 await fetch("/api/vote", {
 method: "POST",
 headers: { "Content-Type": "application/json" },
@@ -97,3 +83,84 @@ container.innerHTML = Object.entries(data)
 
 
 loadUsers();
+
+function showApp() {
+loginDiv.classList.add("hidden");
+appDiv.classList.remove("hidden");
+renderUsers();
+renderResults();
+}
+
+
+function renderUsers() {
+const users = Object.keys(getUsers());
+const list = document.getElementById("users");
+list.innerHTML = "";
+
+
+users.forEach(u => {
+const div = document.= "user";
+
+
+const span = document.createElement("span");
+span.textContent = u;
+
+
+const btn = document.createElement("button");
+btn.textContent = "❤️";
+btn.className = "emoji-btn";
+
+
+btn.onclick = () => vote(u);
+
+
+div.appendChild(span);
+div.appendChild(btn);
+list.appendChild(div);
+});
+}
+
+
+function vote(target) {
+const username = sessionStorage.getItem("qm_logged");
+if (!username) return;
+
+
+const votes = getVotes();
+if (!votes[TODAY]) votes[TODAY] = {};
+
+
+votes[TODAY][username] = target;
+saveVotes(votes);
+
+
+renderResults();
+}
+
+function renderResults() {
+const votes = getVotes()[TODAY] || {};
+const count = {};
+
+
+Object.values(votes).forEach(v => {
+count[v] = (count[v] || 0) + 1;
+});
+
+
+const resultsDiv = document.getElementById("results");
+resultsDiv.innerHTML = "";
+
+
+Object.entries(count)
+.sort((a, b) => b[1] - a[1])
+.forEach(([user, total]) => {
+const p = document.createElement("p");
+p.textContent = `${user}: ${total} ❤️`;
+resultsDiv.appendChild(p);
+});
+}
+
+
+if (sessionStorage.getItem("qm_logged")) {
+showApp();
+}

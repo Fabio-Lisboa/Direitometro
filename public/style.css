@@ -1,0 +1,25 @@
+body {
+font-family: Arial, sans-serif;
+text-align: center;
+background: #111;
+color: white;
+}
+
+
+button {
+padding: 10px 16px;
+margin: 5px;
+border: none;
+border-radius: 8px;
+cursor: pointer;
+}
+
+
+.user {
+margin: 10px;
+}
+
+
+.emoji-btn {
+font-size: 20px;
+}

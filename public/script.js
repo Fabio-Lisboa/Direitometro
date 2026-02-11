@@ -1,40 +1,26 @@
 const USERS_KEY = "qm_users";
-const VOTES_KEY = "qm_votes";
 const MAX_USERS = 10;
 
-const TODAY = new Date().toISOString().slice(0, 10);
-
-function getUsers() {
-  return JSON.parse(localStorage.getItem(USERS_KEY) || "{}");
-}
-
-function saveUsers(users) {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
-}
-
-function getVotes() {
-  return JSON.parse(localStorage.getItem(VOTES_KEY) || "{}");
-}
-
-function saveVotes(votes) {
-  localStorage.setItem(VOTES_KEY, JSON.stringify(votes));
-}
-
-window.addEventListener("DOMContentLoaded", () => {
-  const loginDiv = document.getElementById("login");
-  const appDiv = document.getElementById("app");
+window.onload = function () {
   const loginBtn = document.getElementById("loginBtn");
   const loginError = document.getElementById("loginError");
+  const loginDiv = document.getElementById("login");
+  const appDiv = document.getElementById("app");
+
+  function getUsers() {
+    return JSON.parse(localStorage.getItem(USERS_KEY) || "{}");
+  }
+
+  function saveUsers(users) {
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+  }
 
   function showApp() {
     loginDiv.classList.add("hidden");
     appDiv.classList.remove("hidden");
-    renderUsers();
-    renderResults();
   }
 
-  // ================= LOGIN =================
-  loginBtn.addEventListener("click", () => {
+  loginBtn.onclick = function () {
     const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value.trim();
 
@@ -47,16 +33,19 @@ window.addEventListener("DOMContentLoaded", () => {
 
     const users = getUsers();
 
+    // limite de 10 usuários
     if (!users[username] && Object.keys(users).length >= MAX_USERS) {
       loginError.textContent = "Máximo de 10 usuários atingido.";
       return;
     }
 
+    // usuário já existe com outra senha
     if (users[username] && users[username] !== password) {
       loginError.textContent = "Senha incorreta.";
       return;
     }
 
+    // senha (caractere) já usada por outro usuário
     const passwordInUse = Object.entries(users).some(
       ([u, p]) => p === password && u !== username
     );
@@ -66,9 +55,21 @@ window.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    // cria usuário se não existir
     if (!users[username]) {
       users[username] = password;
       saveUsers(users);
+    }
+
+    sessionStorage.setItem("qm_logged", username);
+    showApp();
+  };
+
+  // mantém logado após recarregar
+  if (sessionStorage.getItem("qm_logged")) {
+    showApp();
+  }
+};
     }
 
     sessionStorage.setItem("qm_logged", username);

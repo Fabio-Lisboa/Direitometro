@@ -10,30 +10,44 @@
 
   <div class="container">
 
-    <!-- LOGIN -->
     <div id="login" class="card">
-      <h1>Direitômetro</h1>
-
-      <input id="username" placeholder="Usuário" />
-      <input id="password" maxlength="1" placeholder="Senha (1 caractere)" />
-
-<button id="loginBtn" type="button">Entrar</button>
+      <h1>Direitômetro ⚖️</h1>
+      <p class="subtitle">Identifique-se para julgar.</p>
       
+      <div class="input-group">
+        <input id="username" placeholder="Seu Nome" autocomplete="off" />
+        <input id="password" maxlength="1" placeholder="Sua Senha (1 caractere)" />
+      </div>
+
+      <button id="loginBtn" type="button">Entrar</button>
       <p id="loginError" class="error"></p>
     </div>
 
-    <!-- APP -->
-    <div id="app" class="card hidden">
-      <h2>Escolha alguém</h2>
-      <div id="users" class="user-list"></div>
+    <div id="voting-area" class="card hidden">
+      <div class="header">
+        <h2>Quem merece um emoji?</h2>
+        <p id="pending-count" class="status-text"></p>
+      </div>
+      <div id="users-to-vote" class="user-list"></div>
+    </div>
 
-      <h2>Resultados do dia</h2>
-      <div id="results"></div>
+    <div id="results-area" class="card hidden">
+      <h2>🏆 Veredito do Dia</h2>
+      <p class="subtitle">Todos os votos foram computados.</p>
+      <div id="results-list"></div>
+      <button onclick="location.reload()" class="secondary-btn">Sair / Atualizar</button>
     </div>
 
   </div>
 
+  <div id="emoji-modal" class="modal hidden">
+    <div class="modal-content">
+      <h3 id="modal-title">Escolha para Fulano:</h3>
+      <div id="emoji-grid" class="emoji-grid"></div>
+      <button id="close-modal">Cancelar</button>
+    </div>
+  </div>
+
 <script src="script.js"></script>
-  
 </body>
 </html>

@@ -1,121 +1,188 @@
 /**
- * Direitômetro - Core Engine
- * Versão Estável para Produção (Vercel Ready)
+ * DIREITÔMETRO - Core Logic
+ * Versão: Production Ready (Vercel)
  */
 
 document.addEventListener("DOMContentLoaded", () => {
-  // --- CONFIGURAÇÕES E ESTADO ---
+  // --- CONFIGURAÇÕES GERAIS ---
   const TODAY = new Date().toISOString().split('T')[0];
-  
-  const elements = {
+
+  // Top 50 Emojis mais usados (Unicode Consortium) + Variados
+  const EMOJIS = [
+    "😂","❤️","🤣","👍","😭","🙏","😘","🥰","😍","😊",
+    "🎉","😁","💕","🥺","😅","🔥","☺️","🤦","♥️","🤷",
+    "🙄","😆","🤗","😉","🎂","🤔","👏","🙂","😳","🥳",
+    "😎","👌","💜","😔","💪","✨","💖","👀","😋","😏",
+    "😢","👉","💗","😩","💯","🌹","💞","🎈","💙","😃"
+  ];
+
+  // --- REFERÊNCIAS DO DOM ---
+  const el = {
     loginBtn: document.getElementById("loginBtn"),
-    usernameInput: document.getElementById("username"),
-    passwordInput: document.getElementById("password"),
+    username: document.getElementById("username"),
+    password: document.getElementById("password"),
     loginError: document.getElementById("loginError"),
     loginCard: document.getElementById("login"),
     appCard: document.getElementById("app"),
     userList: document.getElementById("users"),
-    resultsDiv: document.getElementById("results")
+    results: document.getElementById("results")
   };
 
-  // --- PERSISTÊNCIA DE DADOS (LocalStorage) ---
+  // --- CAMADA DE DADOS (LOCALSTORAGE) ---
   const db = {
     getUsers: () => JSON.parse(localStorage.getItem("qm_users") || "{}"),
-    saveUsers: (users) => localStorage.setItem("qm_users", JSON.stringify(users)),
+    saveUsers: (data) => localStorage.setItem("qm_users", JSON.stringify(data)),
     getVotes: () => JSON.parse(localStorage.getItem("qm_votes") || "{}"),
-    saveVotes: (votes) => localStorage.setItem("qm_votes", JSON.stringify(votes))
+    saveVotes: (data) => localStorage.setItem("qm_votes", JSON.stringify(data)),
   };
 
-  // --- CORE FUNCTIONS ---
+  // --- LÓGICA DE LOGIN E SEGURANÇA ---
+  el.loginBtn.addEventListener("click", () => {
+    const user = el.username.value.trim();
+    const pass = el.password.value.trim();
+    
+    // Limpa erros anteriores
+    el.loginError.textContent = "";
 
-  function showApp() {
-    elements.loginCard.classList.add("hidden");
-    elements.appCard.classList.remove("hidden");
-    renderUsers();
-    renderResults();
-  }
-
-  function renderUsers() {
-    const users = Object.keys(db.getUsers());
-    elements.userList.innerHTML = "";
-
-    users.forEach(user => {
-      const div = document.createElement("div");
-      div.className = "user-item"; // Ajustado para facilitar CSS futuro
-      div.innerHTML = `
-        <span>${user}</span>
-        <button class="emoji-btn" data-user="${user}">❤️</button>
-      `;
-      
-      div.querySelector('button').onclick = () => castVote(user);
-      elements.userList.appendChild(div);
-    });
-  }
-
-  function castVote(target) {
-    const voter = sessionStorage.getItem("qm_logged");
-    if (!voter) return;
-
-    const allVotes = db.getVotes();
-    if (!allVotes[TODAY]) allVotes[TODAY] = {};
-
-    // Validação de voto único por dia
-    if (allVotes[TODAY][voter]) {
-      console.warn("Usuário já votou hoje.");
+    // 1. Validação Básica
+    if (!user) {
+      el.loginError.textContent = "Por favor, digite um nome de usuário.";
       return;
     }
-
-    allVotes[TODAY][voter] = target;
-    db.saveVotes(allVotes);
-    renderResults();
-  }
-
-  function renderResults() {
-    const dayVotes = db.getVotes()[TODAY] || {};
-    const tally = {};
-
-    Object.values(dayVotes).forEach(target => {
-      tally[target] = (tally[target] || 0) + 1;
-    });
-
-    elements.resultsDiv.innerHTML = "";
-    Object.entries(tally)
-      .sort((a, b) => b[1] - a[1])
-      .forEach(([user, count]) => {
-        const p = document.createElement("p");
-        p.className = "result-line";
-        p.innerHTML = `<strong>${user}</strong>: ${count} ❤️`;
-        elements.resultsDiv.appendChild(p);
-      });
-  }
-
-  // --- HANDLERS ---
-
-  elements.loginBtn.addEventListener("click", () => {
-    const user = elements.usernameInput.value.trim();
-    const pass = elements.passwordInput.value.trim();
-
-    if (!user || pass.length !== 1) {
-      elements.loginError.textContent = "Dados inválidos (Senha deve ter 1 caractere).";
+    if (pass.length !== 1) {
+      el.loginError.textContent = "A senha deve ter exatamente 1 caractere.";
       return;
     }
 
     const users = db.getUsers();
 
-    // Lógica de Registro/Login Automático
-    if (!users[user]) {
+    // 2. Verifica se o USUÁRIO já existe
+    if (users[user]) {
+      // Se existe, a senha TEM que bater
+      if (users[user] !== pass) {
+        el.loginError.textContent = "Senha incorreta."; // Regra: Se errar a senha da conta existente
+        return;
+      }
+      // Login com sucesso (usuário recorrente)
+      loginSuccess(user);
+    } 
+    else {
+      // 3. Verifica se a SENHA (Caractere) já está em uso por OUTRA pessoa
+      const passwordsInUse = Object.values(users);
+      if (passwordsInUse.includes(pass)) {
+        el.loginError.textContent = "Caractere indisponível."; // Regra: Senha única no sistema
+        return;
+      }
+
+      // 4. Criação de Novo Usuário
       users[user] = pass;
       db.saveUsers(users);
-    } else if (users[user] !== pass) {
-      elements.loginError.textContent = "Senha incorreta para este usuário.";
+      loginSuccess(user);
+    }
+  });
+
+  function loginSuccess(username) {
+    sessionStorage.setItem("qm_logged", username);
+    showApp();
+  }
+
+  // --- LÓGICA DE EXIBIÇÃO ---
+  function showApp() {
+    el.loginCard.classList.add("hidden");
+    el.appCard.classList.remove("hidden");
+    renderVotingList();
+    renderResults();
+  }
+
+  function renderVotingList() {
+    const users = Object.keys(db.getUsers());
+    const currentUser = sessionStorage.getItem("qm_logged");
+    
+    el.userList.innerHTML = "";
+
+    users.forEach(u => {
+      // Opcional: Não mostrar o próprio usuário na lista de votação (auto-voto)
+      // Se quiser permitir auto-voto, remova o if abaixo.
+      if (u === currentUser) return; 
+
+      const card = document.createElement("div");
+      card.className = "user-card";
+
+      // Cabeçalho do Card
+      const nameTitle = document.createElement("h3");
+      nameTitle.textContent = u;
+      card.appendChild(nameTitle);
+
+      // Container de Emojis
+      const emojiContainer = document.createElement("div");
+      emojiContainer.className = "emoji-grid"; // Classe para o CSS grid
+
+      EMOJIS.forEach(emoji => {
+        const btn = document.createElement("button");
+        btn.textContent = emoji;
+        btn.className = "emoji-btn";
+        btn.onclick = () => handleVote(u, emoji);
+        emojiContainer.appendChild(btn);
+      });
+
+      card.appendChild(emojiContainer);
+      el.userList.appendChild(card);
+    });
+  }
+
+  // --- LÓGICA DE VOTAÇÃO ---
+  window.handleVote = (targetUser, emoji) => {
+    const currentUser = sessionStorage.getItem("qm_logged");
+    if (!currentUser) return;
+
+    const votes = db.getVotes();
+    if (!votes[TODAY]) votes[TODAY] = {};
+
+    // Verifica se já votou hoje
+    if (votes[TODAY][currentUser]) {
+      // Feedback visual simples ou console (sem alert intrusivo)
+      console.warn("Você já votou hoje.");
       return;
     }
 
-    sessionStorage.setItem("qm_logged", user);
-    showApp();
-  });
+    // Registra o voto: Quem votou -> Em quem -> Qual Emoji
+    votes[TODAY][currentUser] = { target: targetUser, emoji: emoji };
+    db.saveVotes(votes);
+    
+    // Atualiza a tela de resultados imediatamente
+    renderResults();
+  };
 
-  // --- INITIAL CHECK ---
+  function renderResults() {
+    const votesToday = db.getVotes()[TODAY] || {};
+    const tally = {};
+
+    // Contabiliza: "Fulano ganhou tal emoji X vezes"
+    Object.values(votesToday).forEach(vote => {
+      const key = `${vote.target}|${vote.emoji}`; // Chave composta
+      tally[key] = (tally[key] || 0) + 1;
+    });
+
+    el.results.innerHTML = "";
+    
+    // Ordena do mais votado para o menos votado
+    const sortedResults = Object.entries(tally).sort((a, b) => b[1] - a[1]);
+
+    if (sortedResults.length === 0) {
+      el.results.innerHTML = "<p>Nenhum voto computado hoje ainda.</p>";
+      return;
+    }
+
+    sortedResults.forEach(([key, count]) => {
+      const [target, emoji] = key.split("|");
+      const p = document.createElement("p");
+      p.className = "result-item";
+      p.innerHTML = `<strong>${target}</strong> recebeu ${count} x ${emoji}`;
+      el.results.appendChild(p);
+    });
+  }
+
+  // --- AUTO LOGIN (SESSÃO) ---
   if (sessionStorage.getItem("qm_logged")) {
     showApp();
   }

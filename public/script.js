@@ -355,9 +355,36 @@ el.settings.deleteBtn.onclick = async () => {
 };
 
 function renderAdminUserList() {
-  const userNames = Object.keys(globalUsers);
   el.settings.adminArea.innerHTML = "";
-  if (userNames.length === 0) { el.settings.adminArea.innerHTML = "<p>Vazio.</p>"; return; }
+
+  // --- BOTÃO DE ZERAR VOTAÇÃO (NOVIDADE) ---
+  const resetBtn = document.createElement("button");
+  resetBtn.className = "danger-btn";
+  resetBtn.style.marginBottom = "20px"; // Espaço para não grudar
+  resetBtn.style.border = "2px dashed white"; // Destaque visual
+  resetBtn.innerHTML = "REINICIAR VOTAÇÃO";
+  
+  resetBtn.onclick = async () => {
+    // Pergunta de segurança para não clicar sem querer
+    const confirmation = prompt("Digite 'ZERAR' para apagar os votos de hoje:");
+    if (confirmation === "ZERAR") {
+      await remove(ref(database, `votes/${TODAY}`));
+      alert("Votação reiniciada!");
+      location.reload();
+    } else {
+      alert("Ação cancelada.");
+    }
+  };
+  el.settings.adminArea.appendChild(resetBtn);
+  // ------------------------------------------
+
+  const userNames = Object.keys(globalUsers);
+  if (userNames.length === 0) { 
+    const p = document.createElement("p");
+    p.innerText = "Nenhum usuário comum cadastrado.";
+    el.settings.adminArea.appendChild(p);
+    return; 
+  }
 
   userNames.forEach(user => {
     if(user === ADMIN_USER) return; 

@@ -24,44 +24,34 @@ const TODAY = new Date().toISOString().split('T')[0];
 const ADMIN_USER = "ADMIN";
 const ADMIN_PASS = "#"; // Senha Mestra
 
-// --- LISTA ROBUSTA DE EMOJIS (+120 opções) ---
-const EMOJIS = [
-  // Reações Clássicas
-  "😂","❤️","🔥","💀","🤡","💩","🤣","😭","🥰","😍",
-  "👍","👎","👏","🙏","💪","👀","🥱","🙄","😡","🤬",
-  "🤮","🤢","🤧","😷","🤒","🤕","🤑","🤠","😈","👿",
-  "👻","👽","🤖","🎃","😺","🙈","🙉","🙊","💋","👋",
-  
-  // Sentimentos & Gestos
-  "🫶","🤝","✌️","🤘","🤙","🤌","🤏","🖕","💅","💃",
-  "🕺","🧘","🤦","🤷","🙆","🙅","🙇","🥺","🥹","😤",
-  "🤯","🫠","🫡","🤫","🫣","🤔","🤨","😐","😑","😶",
-  
-  // Objetos & Status
-  "👑","🏆","🥇","🥈","🥉","💎","💍","💰","💸","💳",
-  "💡","💣","🔪","🔫","🛡️","💊","💉","🚬","⚰️","🪦",
-  "🚀","🛸","⚓","🗺️","🗿","🎮","🎲","🎱","🎭","🎨",
-  
-  // Comida & Bebida
+// --- SISTEMA DE PONTUAÇÃO (+1 / -1) ---
+
+// Emojis que somam +1 ponto (Bons)
+const POSITIVE_EMOJIS = [
+  "❤️","🔥","👍","🥰","😍","👏","🙏","💪","🎉","😁","💕","☺️","👑","🏆","🥇","💎",
+  "💰","🚀","😎","✨","💖","💯","🌹","🫶","🤝","✌️","🤘","🤙","🛡️","😇","✅"
+];
+
+// Emojis que subtraem -1 ponto (Ruins)
+const NEGATIVE_EMOJIS = [
+  "😂","🤣","😭","💀","🤡","💩","👎","👀","🥱","🙄","😡","🤬","🤮","🤢","🤧","😷",
+  "🤕","🤑","🤠","😈","👿","👻","👽","🖕","🤦","🤷","😤","💔","🥀","🆘","❌","⛔","🚫",
+  "🐍","🐀","🐷","🐮","🐔","🐛","🦗","🦂","🗑️"
+];
+
+// Neutros (Comida, Objetos, etc - Valem 0)
+const NEUTRAL_EMOJIS = [
+  "🍔","🍕","🍺","🍻","🍷","☕","🎮","🎲","🎨","✈️","🏖️","🎵","🐶","🐱","🍄","🍆",
   "🍺","🍻","🍷","🥂","🥃","🍸","🍹","☕","🍼","🍕",
   "🍔","🍟","🌭","🍿","🥓","🥩","🍗","🍖","🦴","🧀",
   "🥞","🧇","🥨","🥯","🥖","🥐","🍞","🌰","🥜","🍄",
-  
-  // Natureza & Animais
   "🦁","🐯","🐶","🐺","🐻","🐼","🐨","🐷","🐮","🐔",
   "🐵","🐸","🐲","🦄","🐝","🦋","🐞","🕷️","🐍","🐢",
-  "🌹","🥀","🌺","🌻","🌼","🌷","🌱","🌲","🌳","🌴",
-  
-  // Corações & Símbolos
-  "💔","❤️‍🔥","❤️‍🩹","❣️","💕","💞","💓","💗","💖","💘",
-  "💝","💟","☮️","✝️","☪️","🕉️","☸️","✡️","🔯","🕎",
-  "☯️","☦️","🛐","⛎","♈","♉","♊","♋","♌","♍",
-  "♎","♏","♐","♑","♒","♓","🆔","⚛️","🉑","☢️",
-  "☣️","📴","📳","🈶","🈚","🈸","🈺","🈷️","✴️","🆚",
-  "💮","🉐","㊙️","㊗️","🈴","🈵","🈹","🈲","🅰️","🅱️",
-  "🆎","🆑","🅾️","🆘","❌","⭕","🛑","⛔","📛","🚫",
-  "💯","💢","♨️","🚷","🚯","🚳","🚱","🔞","📵","🚭"
+  "🌹","🥀","🌺","🌻","🌼","🌷","🌱","🌲","🌳","🌴"
 ];
+
+// Lista completa unificada para o Modal
+const EMOJIS = [...POSITIVE_EMOJIS, ...NEGATIVE_EMOJIS, ...NEUTRAL_EMOJIS];
 
 // Variáveis Globais (Sincronizadas)
 let globalUsers = {};
@@ -79,15 +69,13 @@ const el = {
 };
 
 // ============================================================
-// REALTIME LISTENERS (Sincronização Automática)
+// REALTIME LISTENERS
 // ============================================================
-// Ouve mudanças nos usuários em tempo real
 onValue(ref(database, 'users'), (snapshot) => {
   globalUsers = snapshot.val() || {};
   refreshInterface();
 });
 
-// Ouve mudanças nos votos em tempo real
 onValue(ref(database, 'votes'), (snapshot) => {
   globalVotes = snapshot.val() || {};
   refreshInterface();
@@ -126,11 +114,8 @@ el.login.btn.addEventListener("click", async () => {
   if (globalUsers[user]) {
     if (globalUsers[user] !== pass) { el.login.error.textContent = "Senha incorreta."; return; }
   } else {
-    // Cadastro Novo
     if (user.toUpperCase() === ADMIN_USER) { el.login.error.textContent = "Nome reservado."; return; }
     if (Object.values(globalUsers).includes(pass)) { el.login.error.textContent = "Caractere indisponível."; return; }
-    
-    // Salva no Firebase (Isso envia para a nuvem!)
     await set(ref(database, 'users/' + user), pass);
   }
 
@@ -141,7 +126,6 @@ el.login.btn.addEventListener("click", async () => {
 function initApp() {
   const user = sessionStorage.getItem("qm_logged");
   if (!user) { el.header.bar.classList.add("hidden"); return; }
-
   el.login.card.classList.add("hidden");
   el.header.bar.classList.remove("hidden");
   
@@ -203,48 +187,131 @@ el.modal.close.onclick = () => { el.modal.overlay.classList.add("hidden"); curre
 async function confirmVote(emoji) {
   if (!currentTargetUser) return;
   const currentUser = sessionStorage.getItem("qm_logged");
-  // Envia voto para a nuvem
   await set(ref(database, `votes/${TODAY}/${currentUser}/${currentTargetUser}`), emoji);
   el.modal.overlay.classList.add("hidden");
   currentTargetUser = null;
 }
 
 // ============================================================
-// RESULTADOS
+// RESULTADOS COM RANKING E "ESPIÃO DO LANTERNA"
 // ============================================================
 function showResults() {
   el.vote.card.classList.add("hidden");
   el.results.card.classList.remove("hidden");
   
   const votesToday = globalVotes[TODAY] || {};
-  const summary = {}; 
-
-  Object.values(votesToday).forEach(userVotes => {
-    Object.entries(userVotes).forEach(([target, emoji]) => {
-      if (!summary[target]) summary[target] = [];
-      summary[target].push(emoji);
-    });
-  });
-
-  el.results.list.innerHTML = "";
+  
+  let ranking = [];
   const allUsers = Object.keys(globalUsers).filter(u => u !== ADMIN_USER);
 
   if (allUsers.length === 0) { el.results.list.innerHTML = "<p>Nenhum participante.</p>"; return; }
 
+  // 1. Calcula Pontuação de cada usuário
   allUsers.forEach(user => {
-    const received = summary[user] || [];
-    const div = document.createElement("div"); div.className = "result-item"; 
-    if (received.length === 0) {
-      div.innerHTML = `<strong>${user}</strong>: Aguardando votos...`;
-    } else {
-      const counts = {}; received.forEach(e => counts[e] = (counts[e] || 0) + 1);
-      const displayString = Object.entries(counts).sort((a, b) => b[1] - a[1])
-        .map(([e, qtd]) => `${e} <small>x${qtd}</small>`).join("&nbsp;&nbsp;");
-      div.innerHTML = `<strong>${user}</strong> recebeu: <br> ${displayString}`;
-    }
+    let score = 0;
+    let receivedEmojis = [];
+
+    // Varre votos recebidos pelo usuário
+    Object.entries(votesToday).forEach(([voterKey, userVotes]) => {
+      // Ignora votos de usuários deletados
+      if (!globalUsers[voterKey] && voterKey !== ADMIN_USER) return;
+      
+      const emoji = userVotes[user];
+      if (emoji) {
+        receivedEmojis.push(emoji);
+        if (POSITIVE_EMOJIS.includes(emoji)) score++;
+        else if (NEGATIVE_EMOJIS.includes(emoji)) score--;
+      }
+    });
+
+    ranking.push({
+      name: user,
+      score: score,
+      emojis: receivedEmojis
+    });
+  });
+
+  // 2. Ordena: Maior Score primeiro (Decrescente)
+  ranking.sort((a, b) => b.score - a.score);
+
+  // 3. Define quem é o "Lanterna" (Último colocado / Pior Pontuação)
+  // Se houver empate no último lugar, o código pega o último da lista sorteada.
+  let targetName = null;
+  if (ranking.length > 0) {
+    const lastPlace = ranking[ranking.length - 1];
+    // O Lanterna é o último da lista, independente da nota.
+    // (Opcional: Se quiser que só seja lanterna se tiver nota negativa, adicione: && lastPlace.score < 0)
+    targetName = lastPlace.name;
+  }
+
+  // 4. Renderiza
+  el.results.list.innerHTML = "";
+  const currentUser = sessionStorage.getItem("qm_logged");
+
+  ranking.forEach((userData, index) => {
+    const div = document.createElement("div"); 
+    div.className = "result-item"; 
+    
+    const scoreColor = userData.score > 0 ? "#48bb78" : (userData.score < 0 ? "#e53e3e" : "#718096");
+    const scoreSign = userData.score > 0 ? "+" : "";
+
+    // Verifica se é o Lanterna
+    const isTarget = (userData.name === targetName);
+    if (isTarget) div.classList.add("target-of-the-day");
+
+    // Formata Emojis
+    const counts = {}; 
+    userData.emojis.forEach(e => counts[e] = (counts[e] || 0) + 1);
+    
+    const displayEmojis = Object.entries(counts)
+      .sort((a, b) => b[1] - a[1]) 
+      .map(([emoji, qtd]) => {
+        // A MÁGICA: Se eu sou o usuário logado E sou o Lanterna -> Posso clicar
+        if (currentUser === userData.name && isTarget) {
+           return `<span class="reveal-enabled" onclick="revealVoters('${emoji}')" title="Ver quem mandou">${emoji} <small>x${qtd}</small></span>`;
+        }
+        return `<span>${emoji} <small>x${qtd}</small></span>`;
+      }).join("&nbsp;&nbsp;");
+
+    const badge = isTarget ? `<span class="target-badge">💀 Lanterna</span>` : "";
+    const trophy = (index === 0 && userData.score > 0) ? "👑" : ""; 
+
+    div.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+        <strong style="font-size:1.1rem">${trophy} ${userData.name} ${badge}</strong>
+        <strong style="color:${scoreColor}; font-size:1.2rem">${scoreSign}${userData.score} pts</strong>
+      </div>
+      <div style="font-size: 1.1rem; line-height:1.5; margin-top:5px;">
+        ${displayEmojis || "<small style='color:#999'>Aguardando votos...</small>"}
+      </div>
+      ${(currentUser === userData.name && isTarget) ? `<div style="font-size:0.75rem; color:#e53e3e; margin-top:8px; font-weight:bold;">🔓 Você é o Lanterna! Clique nos emojis para descobrir quem mandou.</div>` : ""}
+    `;
+    
     el.results.list.appendChild(div);
   });
 }
+
+// --- FUNÇÃO ESPIÃO (Atachada ao window para o HTML acessar) ---
+window.revealVoters = function(emojiToReveal) {
+  const currentUser = sessionStorage.getItem("qm_logged");
+  const votesToday = globalVotes[TODAY] || {};
+  const culprits = [];
+
+  Object.entries(votesToday).forEach(([voter, votes]) => {
+    // Ignora usuário deletado
+    if (!globalUsers[voter] && voter !== ADMIN_USER) return;
+    
+    if (votes[currentUser] === emojiToReveal) {
+      culprits.push(voter);
+    }
+  });
+
+  if (culprits.length > 0) {
+    alert(`Quem te mandou ${emojiToReveal}:\n\n${culprits.join(", ")}`);
+  } else {
+    alert("Ninguém encontrado.");
+  }
+};
 
 // ============================================================
 // CONFIGURAÇÕES & ADMIN

@@ -17,7 +17,7 @@
 
     <div id="login" class="card">
       <h1>Direitômetro ⚖️</h1>
-      <p class="subtitle">Crie ou acesse um Usuário Único</p>
+      <p class="subtitle">Identifique-se para julgar.</p>
       
       <div class="input-group">
         <input id="username" placeholder="Seu Nome" autocomplete="off" />
@@ -37,14 +37,14 @@
     </div>
 
     <div id="results-area" class="card hidden">
-      <h2>Veredito do Dia</h2>
-      <p class="subtitle">Todos os votos foram computados.</p>
+      <h2>🏆 Veredito do Dia</h2>
+      <p class="subtitle">Ranking de Reputação (+1 / -1)</p>
       
       <div id="results-list"></div>
 
       <div class="action-buttons">
-        <button id="refresh-btn" class="primary-btn">Atualizar Lista</button>
-        <button id="logout-btn" class="secondary-btn">Sair</button>
+        <button id="refresh-btn" class="primary-btn">🔄 Atualizar</button>
+        <button id="logout-btn" class="secondary-btn">❌ Sair</button>
       </div>
     </div>
 
@@ -63,7 +63,7 @@
       <h3 id="settings-title">Gerenciar Perfil</h3>
       
       <div id="normal-user-settings">
-        <p>Alterar sua senha atual:</p>
+        <p>Alterar senha:</p>
         <div class="input-group" style="margin-bottom: 15px;">
           <input id="new-password" maxlength="1" placeholder="Nova senha (1 char)..." />
           <button id="save-pass-btn">💾 Salvar</button>
@@ -78,6 +78,6 @@
     </div>
   </div>
 
-<script type="module" src="script.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
 </html>

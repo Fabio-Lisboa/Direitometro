@@ -248,12 +248,25 @@ function showResults() {
   el.results.list.innerHTML = "";
   const currentUser = sessionStorage.getItem("qm_logged");
 
+// ... dentro da função showResults(), substitua o ranking.forEach por este:
+
+  // 4. Renderiza
+  el.results.list.innerHTML = "";
+  const currentUser = sessionStorage.getItem("qm_logged");
+
   ranking.forEach((userData, index) => {
     const div = document.createElement("div"); 
     div.className = "result-item"; 
     
-    const scoreColor = userData.score > 0 ? "#48bb78" : (userData.score < 0 ? "#e53e3e" : "#718096");
-    const scoreSign = userData.score > 0 ? "+" : "";
+    // Lógica da nova Badge
+    let scoreClass = "score-neu";
+    let scoreSign = "";
+    if (userData.score > 0) {
+        scoreClass = "score-pos";
+        scoreSign = "+";
+    } else if (userData.score < 0) {
+        scoreClass = "score-neg";
+    }
 
     // Verifica se é o Lanterna
     const isTarget = (userData.name === targetName);
@@ -266,7 +279,6 @@ function showResults() {
     const displayEmojis = Object.entries(counts)
       .sort((a, b) => b[1] - a[1]) 
       .map(([emoji, qtd]) => {
-        // A MÁGICA: Se eu sou o usuário logado E sou o Lanterna -> Posso clicar
         if (currentUser === userData.name && isTarget) {
            return `<span class="reveal-enabled" onclick="revealVoters('${emoji}')" title="Ver quem mandou">${emoji} <small>x${qtd}</small></span>`;
         }
@@ -276,10 +288,11 @@ function showResults() {
     const badge = isTarget ? `<span class="target-badge">💀 Lanterna</span>` : "";
     const trophy = (index === 0 && userData.score > 0) ? "👑" : ""; 
 
+    // NOVO HTML DO CARD
     div.innerHTML = `
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+      <div class="result-header">
         <strong style="font-size:1.1rem">${trophy} ${userData.name} ${badge}</strong>
-        <strong style="color:${scoreColor}; font-size:1.2rem">${scoreSign}${userData.score} pts</strong>
+        <span class="score-badge ${scoreClass}">${scoreSign}${userData.score}</span>
       </div>
       <div style="font-size: 1.1rem; line-height:1.5; margin-top:5px;">
         ${displayEmojis || "<small style='color:#999'>Aguardando votos...</small>"}

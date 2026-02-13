@@ -13,7 +13,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px 0; /* Espaço para não grudar nas bordas em telas pequenas */
+  padding: 20px 0;
 }
 
 .container {
@@ -55,10 +55,9 @@ hr { margin: 15px 0; border: 0; border-top: 1px solid #eee; }
   box-shadow: 0 4px 6px rgba(0,0,0,0.05);
 }
 
-/* CORREÇÃO DE CONTRASTE DO ÍCONE */
 .icon-btn {
-  background: white; /* Fundo branco sólido */
-  color: #667eea;    /* Ícone roxo */
+  background: white;
+  color: #667eea;
   width: 42px;
   height: 42px;
   padding: 0;
@@ -70,11 +69,10 @@ hr { margin: 15px 0; border: 0; border-top: 1px solid #eee; }
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   transition: transform 0.2s;
 }
-
 .icon-btn:active { transform: scale(0.9); }
 
 /* =========================================
-   INPUTS & BOTÕES GERAIS
+   INPUTS & BOTÕES
    ========================================= */
 .input-group { display: flex; flex-direction: column; gap: 12px; }
 
@@ -88,7 +86,6 @@ input {
   transition: border-color 0.2s, background 0.2s;
   background: #f7fafc;
 }
-
 input:focus { border-color: #667eea; background: white; }
 
 button {
@@ -101,34 +98,27 @@ button {
   font-weight: bold;
   cursor: pointer;
   width: 100%;
-  transition: transform 0.1s, background 0.2s, filter 0.2s;
+  transition: transform 0.1s, filter 0.2s;
 }
-
 button:active { transform: scale(0.98); }
 button:hover { filter: brightness(110%); }
 
-/* Tipos de Botão */
-.primary-btn { background: #48bb78; } /* Verde */
-.secondary-btn { background: #a0aec0; } /* Cinza */
-.danger-btn { background: #e53e3e; } /* Vermelho */
+.primary-btn { background: #48bb78; }
+.secondary-btn { background: #a0aec0; }
+.danger-btn { background: #e53e3e; }
 
-/* CORREÇÃO DOS BOTÕES LADO A LADO */
 .action-buttons {
   display: flex;
   gap: 12px;
   margin-top: 10px;
 }
-/* Faz os botões dentro deste grupo terem o mesmo tamanho */
-.action-buttons button {
-  flex: 1; 
-}
+.action-buttons button { flex: 1; }
 
-/* Títulos */
 h1, h2, h3 { margin: 0; text-align: center; color: #2d3748; }
 .subtitle { text-align: center; color: #718096; margin: -10px 0 15px 0; font-size: 0.95rem; }
 
 /* =========================================
-   LISTAS & CARDS
+   LISTAS & RESULTADOS
    ========================================= */
 .user-list { display: flex; flex-direction: column; gap: 10px; }
 
@@ -143,7 +133,6 @@ h1, h2, h3 { margin: 0; text-align: center; color: #2d3748; }
   align-items: center;
   font-weight: 600;
 }
-
 .user-to-vote-btn:hover {
   border-color: #667eea;
   color: #667eea;
@@ -161,8 +150,6 @@ h1, h2, h3 { margin: 0; text-align: center; color: #2d3748; }
   color: #2d3748;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
-.result-item strong { color: #553c9a; }
-.result-item small { color: #718096; font-weight: bold;}
 
 /* =========================================
    MODAIS
@@ -204,61 +191,53 @@ h1, h2, h3 { margin: 0; text-align: center; color: #2d3748; }
   font-size: 1.8rem;
   padding: 10px 0;
   border-radius: 12px;
-  transition: transform 0.2s, background 0.2s;
+  transition: transform 0.2s;
 }
 .emoji-option:hover { background: #e2e8f0; transform: scale(1.15); z-index: 2; }
 
 /* =========================================
-   ESTILOS DA ÁREA ADMIN
+   ADMIN
    ========================================= */
 .admin-user-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  margin-bottom: 8px;
-  font-weight: bold;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0;
+  border-radius: 10px; margin-bottom: 8px; font-weight: bold;
 }
-
-.admin-delete-btn {
-  width: auto; /* Sobrescreve o width: 100% padrão */
-  padding: 8px 12px;
-  font-size: 0.9rem;
-  margin: 0;
-}
+.admin-delete-btn { width: auto; padding: 8px 12px; font-size: 0.9rem; margin: 0; }
 
 @keyframes modalPop {
   from { opacity: 0; transform: scale(0.95) translateY(10px); }
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-/* --- NOVO VISUAL DOS PONTOS (BADGES) --- */
-
-.score-badge {
-  padding: 6px 12px;
-  border-radius: 20px; /* Arredondado */
-  font-weight: 800;
-  font-size: 1rem;
-  color: white;
-  min-width: 45px; /* Garante um tamanho mínimo */
-  text-align: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  transition: transform 0.2s;
+/* =========================================
+   NOVO: RANKING BADGES & LANTERNA
+   ========================================= */
+.target-of-the-day {
+  border: 2px solid #e53e3e !important;
+  background-color: #fff5f5 !important;
+  position: relative;
 }
 
-.score-badge:hover {
-  transform: scale(1.05);
+.target-badge {
+  background: #e53e3e; color: white; font-size: 0.75rem;
+  padding: 4px 8px; border-radius: 12px; margin-left: 8px;
+  font-weight: bold; text-transform: uppercase; vertical-align: middle;
 }
 
-/* Cores baseadas no resultado */
-.score-pos { background: linear-gradient(135deg, #48bb78, #38a169); } /* Verde */
-.score-neg { background: linear-gradient(135deg, #e53e3e, #c53030); } /* Vermelho */
-.score-neu { background: linear-gradient(135deg, #a0aec0, #718096); } /* Cinza */
+.reveal-enabled {
+  cursor: help;
+  border-bottom: 2px dashed #e53e3e;
+  transition: all 0.2s;
+}
+.reveal-enabled:hover {
+  background-color: rgba(229, 62, 62, 0.1);
+  transform: scale(1.1);
+  display: inline-block;
+  border-radius: 4px;
+}
 
-/* Ajuste no header do card para alinhar melhor */
+/* Estilo das "Pílulas" de Pontuação */
 .result-header {
     display: flex;
     justify-content: space-between;
@@ -267,3 +246,19 @@ h1, h2, h3 { margin: 0; text-align: center; color: #2d3748; }
     padding-bottom: 10px;
     border-bottom: 1px solid #edf2f7;
 }
+
+.score-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 800;
+  font-size: 1rem;
+  color: white;
+  min-width: 45px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Cores das Badges */
+.score-pos { background: linear-gradient(135deg, #48bb78, #38a169); } /* Verde */
+.score-neg { background: linear-gradient(135deg, #e53e3e, #c53030); } /* Vermelho */
+.score-neu { background: linear-gradient(135deg, #a0aec0, #718096); } /* Cinza */

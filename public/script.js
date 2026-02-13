@@ -22,24 +22,24 @@ const database = getDatabase(app);
 // --- CONFIGURAÇÕES GERAIS ---
 const TODAY = new Date().toISOString().split('T')[0];
 const ADMIN_USER = "ADMIN";
-const ADMIN_PASS = "#"; // Senha Mestra
+const ADMIN_PASS = "#"; 
 
-// --- SISTEMA DE PONTUAÇÃO (+1 / -1) ---
+// --- LISTAS DE EMOJIS PARA PONTUAÇÃO ---
 
-// Emojis que somam +1 ponto (Bons)
+// Somam +1 ponto
 const POSITIVE_EMOJIS = [
   "❤️","🔥","👍","🥰","😍","👏","🙏","💪","🎉","😁","💕","☺️","👑","🏆","🥇","💎",
   "💰","🚀","😎","✨","💖","💯","🌹","🫶","🤝","✌️","🤘","🤙","🛡️","😇","✅"
 ];
 
-// Emojis que subtraem -1 ponto (Ruins)
+// Subtraem -1 ponto
 const NEGATIVE_EMOJIS = [
   "😂","🤣","😭","💀","🤡","💩","👎","👀","🥱","🙄","😡","🤬","🤮","🤢","🤧","😷",
   "🤕","🤑","🤠","😈","👿","👻","👽","🖕","🤦","🤷","😤","💔","🥀","🆘","❌","⛔","🚫",
   "🐍","🐀","🐷","🐮","🐔","🐛","🦗","🦂","🗑️"
 ];
 
-// Neutros (Comida, Objetos, etc - Valem 0)
+// Valem 0 (Neutros)
 const NEUTRAL_EMOJIS = [
   "🍔","🍕","🍺","🍻","🍷","☕","🎮","🎲","🎨","✈️","🏖️","🎵","🐶","🐱","🍄","🍆",
   "🍺","🍻","🍷","🥂","🥃","🍸","🍹","☕","🍼","🍕",
@@ -50,10 +50,10 @@ const NEUTRAL_EMOJIS = [
   "🌹","🥀","🌺","🌻","🌼","🌷","🌱","🌲","🌳","🌴"
 ];
 
-// Lista completa unificada para o Modal
+// Lista unificada para o Modal
 const EMOJIS = [...POSITIVE_EMOJIS, ...NEGATIVE_EMOJIS, ...NEUTRAL_EMOJIS];
 
-// Variáveis Globais (Sincronizadas)
+// Variáveis Globais
 let globalUsers = {};
 let globalVotes = {};
 let currentTargetUser = null;
@@ -94,7 +94,7 @@ function refreshInterface() {
 }
 
 // ============================================================
-// LÓGICA DE LOGIN
+// LOGIN
 // ============================================================
 el.login.btn.addEventListener("click", async () => {
   const user = el.login.user.value.trim();
@@ -103,7 +103,7 @@ el.login.btn.addEventListener("click", async () => {
 
   if (!user || pass.length !== 1) { el.login.error.textContent = "Nome e senha (1 char) obrigatórios."; return; }
 
-  // ADMIN LOGIN
+  // ADMIN
   if (user === ADMIN_USER && pass === ADMIN_PASS) {
     sessionStorage.setItem("qm_logged", ADMIN_USER);
     initApp();
@@ -114,7 +114,7 @@ el.login.btn.addEventListener("click", async () => {
   if (globalUsers[user]) {
     if (globalUsers[user] !== pass) { el.login.error.textContent = "Senha incorreta."; return; }
   } else {
-    if (user.toUpperCase() === ADMIN_USER) { el.login.error.textContent = "Nome reservado."; return; }
+    if (user.toUpperCase() === ADMIN_USER) { el.login.error.textContent = "Reservado."; return; }
     if (Object.values(globalUsers).includes(pass)) { el.login.error.textContent = "Caractere indisponível."; return; }
     await set(ref(database, 'users/' + user), pass);
   }
@@ -193,7 +193,7 @@ async function confirmVote(emoji) {
 }
 
 // ============================================================
-// RESULTADOS COM RANKING E "ESPIÃO DO LANTERNA"
+// RESULTADOS (COM PÍLULAS DE PONTUAÇÃO)
 // ============================================================
 function showResults() {
   el.vote.card.classList.add("hidden");
@@ -206,14 +206,12 @@ function showResults() {
 
   if (allUsers.length === 0) { el.results.list.innerHTML = "<p>Nenhum participante.</p>"; return; }
 
-  // 1. Calcula Pontuação de cada usuário
+  // 1. Calcula Pontuação
   allUsers.forEach(user => {
     let score = 0;
     let receivedEmojis = [];
 
-    // Varre votos recebidos pelo usuário
     Object.entries(votesToday).forEach(([voterKey, userVotes]) => {
-      // Ignora votos de usuários deletados
       if (!globalUsers[voterKey] && voterKey !== ADMIN_USER) return;
       
       const emoji = userVotes[user];
@@ -231,24 +229,15 @@ function showResults() {
     });
   });
 
-  // 2. Ordena: Maior Score primeiro (Decrescente)
+  // 2. Ordena (Maior Score primeiro)
   ranking.sort((a, b) => b.score - a.score);
 
-  // 3. Define quem é o "Lanterna" (Último colocado / Pior Pontuação)
-  // Se houver empate no último lugar, o código pega o último da lista sorteada.
+  // 3. Define Lanterna
   let targetName = null;
   if (ranking.length > 0) {
     const lastPlace = ranking[ranking.length - 1];
-    // O Lanterna é o último da lista, independente da nota.
-    // (Opcional: Se quiser que só seja lanterna se tiver nota negativa, adicione: && lastPlace.score < 0)
     targetName = lastPlace.name;
   }
-
-  // 4. Renderiza
-  el.results.list.innerHTML = "";
-  const currentUser = sessionStorage.getItem("qm_logged");
-
-// ... dentro da função showResults(), substitua o ranking.forEach por este:
 
   // 4. Renderiza
   el.results.list.innerHTML = "";
@@ -258,7 +247,7 @@ function showResults() {
     const div = document.createElement("div"); 
     div.className = "result-item"; 
     
-    // Lógica da nova Badge
+    // Define a classe CSS da Badge
     let scoreClass = "score-neu";
     let scoreSign = "";
     if (userData.score > 0) {
@@ -268,11 +257,9 @@ function showResults() {
         scoreClass = "score-neg";
     }
 
-    // Verifica se é o Lanterna
     const isTarget = (userData.name === targetName);
     if (isTarget) div.classList.add("target-of-the-day");
 
-    // Formata Emojis
     const counts = {}; 
     userData.emojis.forEach(e => counts[e] = (counts[e] || 0) + 1);
     
@@ -288,7 +275,6 @@ function showResults() {
     const badge = isTarget ? `<span class="target-badge">💀 Lanterna</span>` : "";
     const trophy = (index === 0 && userData.score > 0) ? "👑" : ""; 
 
-    // NOVO HTML DO CARD
     div.innerHTML = `
       <div class="result-header">
         <strong style="font-size:1.1rem">${trophy} ${userData.name} ${badge}</strong>
@@ -304,16 +290,14 @@ function showResults() {
   });
 }
 
-// --- FUNÇÃO ESPIÃO (Atachada ao window para o HTML acessar) ---
+// --- FUNÇÃO ESPIÃO ---
 window.revealVoters = function(emojiToReveal) {
   const currentUser = sessionStorage.getItem("qm_logged");
   const votesToday = globalVotes[TODAY] || {};
   const culprits = [];
 
   Object.entries(votesToday).forEach(([voter, votes]) => {
-    // Ignora usuário deletado
     if (!globalUsers[voter] && voter !== ADMIN_USER) return;
-    
     if (votes[currentUser] === emojiToReveal) {
       culprits.push(voter);
     }
@@ -327,7 +311,7 @@ window.revealVoters = function(emojiToReveal) {
 };
 
 // ============================================================
-// CONFIGURAÇÕES & ADMIN
+// ADMIN & SETTINGS
 // ============================================================
 el.header.btn.onclick = () => {
   const currentUser = sessionStorage.getItem("qm_logged");

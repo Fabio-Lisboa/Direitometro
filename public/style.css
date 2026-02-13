@@ -235,38 +235,35 @@ h1, h2, h3 { margin: 0; text-align: center; color: #2d3748; }
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-/* --- NOVOS ESTILOS PARA O RANKING E O LANTERNA --- */
+/* --- NOVO VISUAL DOS PONTOS (BADGES) --- */
 
-/* Destaque para o último colocado (Alvo/Lanterna) */
-.target-of-the-day {
-  border: 2px solid #e53e3e !important; /* Borda Vermelha */
-  background-color: #fff5f5 !important; /* Fundo avermelhado */
-  position: relative;
-}
-
-/* Badge (Etiqueta) Vermelha */
-.target-badge {
-  background: #e53e3e;
+.score-badge {
+  padding: 6px 12px;
+  border-radius: 20px; /* Arredondado */
+  font-weight: 800;
+  font-size: 1rem;
   color: white;
-  font-size: 0.75rem;
-  padding: 4px 8px;
-  border-radius: 12px;
-  margin-left: 8px;
-  font-weight: bold;
-  text-transform: uppercase;
-  vertical-align: middle;
+  min-width: 45px; /* Garante um tamanho mínimo */
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
 }
 
-/* Cursor especial para quando o Lanterna passar o mouse nos votos */
-.reveal-enabled {
-  cursor: help; /* Ícone de interrogação */
-  border-bottom: 2px dashed #e53e3e;
-  transition: all 0.2s;
+.score-badge:hover {
+  transform: scale(1.05);
 }
 
-.reveal-enabled:hover {
-  background-color: rgba(229, 62, 62, 0.1);
-  transform: scale(1.1);
-  display: inline-block;
-  border-radius: 4px;
+/* Cores baseadas no resultado */
+.score-pos { background: linear-gradient(135deg, #48bb78, #38a169); } /* Verde */
+.score-neg { background: linear-gradient(135deg, #e53e3e, #c53030); } /* Vermelho */
+.score-neu { background: linear-gradient(135deg, #a0aec0, #718096); } /* Cinza */
+
+/* Ajuste no header do card para alinhar melhor */
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #edf2f7;
 }

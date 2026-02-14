@@ -310,7 +310,24 @@ function showResults() {
 
     const badge = isTarget ? `<span class="target-badge">💀 Lanterna</span>` : "";
     const trophy = (index === 0 && userData.score > 0) ? "👑" : ""; 
-    
+
+    async function revealOneVote(emoji) {
+  const currentUser = sessionStorage.getItem("qm_logged");
+  const votesToday = globalVotes[TODAY] || {};
+
+  const culprits = [];
+
+  Object.entries(votesToday).forEach(([voter, votes]) => {
+    if (votes?.[currentUser] === emoji) culprits.push(voter);
+  });
+
+  el.tabs.revealResult.classList.remove("hidden");
+  // marca como usado
+  await set(ref(database, `votes/${TODAY}/__revealed/${currentUser}`), true);
+
+  renderRevealChoices();
+}
+
     el.results.list.appendChild(div);
   });
 }

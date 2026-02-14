@@ -2,131 +2,113 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Direitômetro</title>
   <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
 
-  <div class="main-container">
+  <div class="container">
 
-    <div id="login-screen" class="screen active">
-      <div class="login-card">
-        <div class="logo-area">
-          <h1>⚖️ Direitômetro</h1>
-          <p>O Tribunal Digital</p>
-        </div>
-        
-        <div class="input-group">
-          <label>Codinome</label>
-          <input id="username" placeholder="Quem é você?" autocomplete="off" />
-        </div>
-        
-        <div class="input-group">
-          <label>Senha</label>
-          <input id="password" type="password" maxlength="1" placeholder="#" />
-        </div>
+    <div id="app-header" class="header-bar hidden">
+      <span id="welcome-msg">Olá, Usuário</span>
+      <button id="settings-btn" class="icon-btn">⚙️</button>
+    </div>
 
-        <button id="loginBtn" class="btn-primary big-btn">ENTRAR</button>
-        <p id="loginError" class="error-msg"></p>
+    <div id="login" class="card">
+      <h1>Direitômetro ⚖️</h1>
+      <p class="subtitle">Identifique-se para julgar.</p>
+      
+      <div class="input-group">
+        <input id="username" placeholder="Seu Nome" autocomplete="off" />
+        <input id="password" maxlength="1" placeholder="Sua Senha (1 caractere)" />
+      </div>
+
+      <button id="loginBtn" type="button">Entrar</button>
+      <p id="loginError" class="error"></p>
+    </div>
+
+    <div id="intrigue-area" class="card hidden" style="border: 2px solid #ecc94b; background: #fffff0;">
+      <div class="header">
+        <h2 style="color: #d69e2e;">🔥 Intriga do Dia</h2>
+      </div>
+      
+      <div id="intrigue-waiting" class="hidden" style="text-align: center;">
+        <p>O Juiz sorteado de hoje é:</p>
+        <h3 id="judge-name" style="color: #d69e2e;">...</h3>
+        <p class="status-text">Aguardando sentença...</p>
+      </div>
+
+      <div id="intrigue-play" class="hidden">
+        <p style="text-align: center; font-weight: bold; color: #d69e2e;">👑 VOCÊ É O JUIZ!</p>
+        <p id="intrigue-question" style="text-align: center; font-weight: bold; font-size: 1.1rem; margin-bottom: 15px;">...</p>
+        <div id="intrigue-inputs" style="display: flex; flex-direction: column; gap: 10px;"></div>
+        <button id="submit-intrigue-btn" class="primary-btn" style="margin-top: 15px; background: #d69e2e;">Publicar Sentença</button>
+      </div>
+
+      <div id="intrigue-result" class="hidden">
+        <p id="res-question" style="text-align: center; font-weight: bold; margin-bottom: 10px;">...</p>
+        <div style="display: flex; gap: 5px;">
+          <div style="flex: 1; background: #edf2f7; padding: 10px; border-radius: 8px; border-top: 3px solid #48bb78;">
+            <strong id="label-a" style="display:block; text-align:center; color:#276749; font-size:0.8rem; margin-bottom:5px;">...</strong>
+            <div id="list-a" style="font-size: 0.9rem;"></div>
+          </div>
+          <div style="flex: 1; background: #edf2f7; padding: 10px; border-radius: 8px; border-top: 3px solid #e53e3e;">
+            <strong id="label-b" style="display:block; text-align:center; color:#9b2c2c; font-size:0.8rem; margin-bottom:5px;">...</strong>
+            <div id="list-b" style="font-size: 0.9rem;"></div>
+          </div>
+        </div>
+        <p style="text-align: right; font-size: 0.7rem; color: #718096; margin-top: 5px;">Juiz: <span id="res-judge"></span></p>
       </div>
     </div>
 
-    <div id="app-screen" class="screen hidden">
+    <div id="voting-area" class="card hidden">
+      <div class="header">
+        <h2>Quem merece um emoji?</h2>
+        <p id="pending-count" class="status-text"></p>
+      </div>
+      <div id="users-to-vote" class="user-list"></div>
+    </div>
+
+    <div id="results-area" class="card hidden">
+      <h2>🏆 Veredito do Dia</h2>
+      <p class="subtitle">Ranking de Reputação</p>
       
-      <header class="app-header">
-        <div class="user-chip">
-          <span class="avatar" id="user-avatar">?</span>
-          <span class="username" id="welcome-msg">...</span>
-        </div>
-        <button id="settings-btn" class="icon-btn">⚙️</button>
-      </header>
+      <div id="results-list"></div>
 
-      <main class="feed-content">
-        
-        <div id="intrigue-area" class="card intrigue-card hidden">
-          <div class="card-header intrigue-header">
-            <span class="icon">🔥</span>
-            <h2>A Intriga</h2>
-          </div>
-
-          <div id="intrigue-waiting" class="intrigue-state hidden">
-            <p>O Juiz sorteado de hoje é:</p>
-            <div class="judge-badge" id="judge-name">...</div>
-            <small>Aguardando sentença...</small>
-          </div>
-
-          <div id="intrigue-play" class="intrigue-state hidden">
-            <div class="you-are-judge">👑 Você é o Juiz!</div>
-            <h3 id="intrigue-q-text">...</h3>
-            <div id="intrigue-inputs" class="inputs-list"></div>
-            <button id="submit-intrigue-btn" class="btn-primary">Publicar Sentença</button>
-          </div>
-
-          <div id="intrigue-result" class="intrigue-state hidden">
-            <h3 id="res-q-text" class="q-title">...</h3>
-            <div class="versus-container">
-              <div class="team team-a">
-                <h4 id="label-a">...</h4>
-                <div id="list-a"></div>
-              </div>
-              <div class="vs-badge">VS</div>
-              <div class="team team-b">
-                <h4 id="label-b">...</h4>
-                <div id="list-b"></div>
-              </div>
-            </div>
-            <div class="judge-sign">Juiz: <span id="res-judge"></span></div>
-          </div>
-        </div>
-
-        <div id="voting-area" class="card hidden">
-          <div class="card-header">
-            <h2>Julgamento</h2>
-            <span class="badge-count" id="pending-count">0</span>
-          </div>
-          <div id="users-to-vote" class="vote-list"></div>
-        </div>
-
-        <div id="results-area" class="card hidden">
-          <div class="card-header">
-            <h2>Reputação</h2>
-            <button id="refresh-btn" class="refresh-icon">🔄</button>
-          </div>
-          <div id="results-list" class="rank-list"></div>
-        </div>
-
-      </main>
+      <div class="action-buttons">
+        <button id="refresh-btn" class="primary-btn">Atualizar</button>
+        <button id="logout-btn" class="secondary-btn">Sair</button>
+      </div>
     </div>
 
   </div>
 
   <div id="emoji-modal" class="modal hidden">
-    <div class="modal-sheet">
-      <div class="sheet-header">
-        <h3>Sua Sentença</h3>
-        <button id="close-modal">✕</button>
-      </div>
+    <div class="modal-content">
+      <h3 id="modal-title">Escolha:</h3>
       <div id="emoji-grid" class="emoji-grid"></div>
+      <button id="close-modal" class="danger-btn" style="margin-top: 15px;">Cancelar</button>
     </div>
   </div>
 
   <div id="settings-modal" class="modal hidden">
-    <div class="modal-card">
-      <h3>Configurações</h3>
-      <div id="normal-settings">
-        <label>Alterar Senha:</label>
-        <div class="row-input">
-          <input id="new-password" maxlength="1" placeholder="#" />
-          <button id="save-pass-btn" class="btn-primary">Salvar</button>
+    <div class="modal-content">
+      <h3 id="settings-title">Gerenciar Perfil</h3>
+      
+      <div id="normal-user-settings">
+        <p>Alterar senha:</p>
+        <div class="input-group" style="margin-bottom: 15px;">
+          <input id="new-password" maxlength="1" placeholder="Nova senha (1 char)..." />
+          <button id="save-pass-btn">Salvar</button>
         </div>
         <hr>
-        <button id="logout-btn" class="btn-secondary full">Sair</button>
-        <button id="delete-account-btn" class="btn-danger full mt-10">Excluir Conta</button>
+        <button id="delete-account-btn" class="danger-btn">Excluir Minha Conta</button>
       </div>
-      <div id="admin-area" class="hidden"></div>
-      <button id="close-settings" class="btn-text mt-10">Fechar</button>
+
+      <div id="admin-user-list" class="hidden"></div>
+
+      <button id="close-settings" class="secondary-btn" style="margin-top:15px">Fechar</button>
     </div>
   </div>
 

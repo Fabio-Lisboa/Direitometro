@@ -310,17 +310,6 @@ function showResults() {
 
     const badge = isTarget ? `<span class="target-badge">💀 Lanterna</span>` : "";
     const trophy = (index === 0 && userData.score > 0) ? "👑" : ""; 
-
-    div.innerHTML = `
-      <div class="result-header">
-        <strong style="font-size:1.1rem">${trophy} ${userData.name} ${badge}</strong>
-        <span class="score-badge ${scoreClass}">${scoreSign}${userData.score}</span>
-      </div>
-      <div style="font-size: 1.1rem; line-height:1.5; margin-top:5px;">
-        ${displayEmojis || "<small style='color:#999'>Aguardando votos...</small>"}
-      </div>
-      ${isTarget ? `<div class="lanterna-warning">FOFOCA LIBERADA: clique nos emojis para ver quem votou.</div>` : ""}
-    `;
     
     el.results.list.appendChild(div);
   });

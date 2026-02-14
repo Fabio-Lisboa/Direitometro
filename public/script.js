@@ -85,6 +85,21 @@ el.tabs = {
   revealResult: document.getElementById("reveal-result")
 };
 
+el.tabs.ranking.onclick = () => {
+  el.tabs.ranking.classList.add("active");
+  el.tabs.reveal.classList.remove("active");
+  el.tabs.rankingView.classList.remove("hidden");
+  el.tabs.revealView.classList.add("hidden");
+};
+
+el.tabs.reveal.onclick = () => {
+  el.tabs.reveal.classList.add("active");
+  el.tabs.ranking.classList.remove("active");
+  el.tabs.revealView.classList.remove("hidden");
+  el.tabs.rankingView.classList.add("hidden");
+  renderRevealChoices();
+};
+
 
 // ============================================================
 // REALTIME LISTENERS
@@ -414,3 +429,54 @@ el.results.refreshBtn.onclick = () => location.reload();
 el.results.logoutBtn.onclick = () => { sessionStorage.removeItem("qm_logged"); location.reload(); };
 
 if (sessionStorage.getItem("qm_logged")) initApp();
+
+function renderRevealChoices() {
+  const currentUser = sessionStorage.getItem("qm_logged");
+  const votesToday = globalVotes[TODAY] || {};
+
+  // já revelou hoje?
+  if (votesToday.__revealed && votesToday.__revealed[currentUser]) {
+    el.tabs.revealChoices.innerHTML = "<p>Você já revelou um voto hoje.</p>";
+    return;
+  }
+
+  // contar emojis recebidos
+  const counts = {};
+
+  Object.values(votesToday).forEach(votes => {
+    const emoji = votes?.[currentUser];
+    if (emoji) counts[emoji] = (counts[emoji] || 0) + 1;
+  });
+
+  el.tabs.revealChoices.innerHTML = "";
+
+  Object.keys(counts).forEach(emoji => {
+    const btn = document.createElement("button");
+    btn.className = "reveal-btn";
+    btn.textContent = `${emoji} x${counts[emoji]}`;
+    btn.onclick = () => revealOneVote(emoji);
+    el.tabs.revealChoices.appendChild(btn);
+  });
+}
+
+async function revealOneVote(emoji) {
+  const currentUser = sessionStorage.getItem("qm_logged");
+  const votesToday = globalVotes[TODAY] || {};
+
+  const culprits = [];
+
+  Object.entries(votesToday).forEach(([voter, votes]) => {
+    if (votes?.[currentUser] === emoji) culprits.push(voter);
+  });
+
+  el.tabs.revealResult.classList.remove("hidden");
+  el.tabs.revealResult.textContent =
+    culprits.length
+      ? `Quem enviou ${emoji}: ${culprits.join(", ")}`
+      : "Ninguém encontrado.";
+
+  // marca como usado
+  await set(ref(database, `votes/${TODAY}/__revealed/${currentUser}`), true);
+
+  renderRevealChoices();
+}

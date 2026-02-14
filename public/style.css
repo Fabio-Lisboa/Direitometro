@@ -73,15 +73,16 @@ button{
 .score-neg{background:#dc2626}
 .score-neu{background:#64748b}
 
-/* MODAL */
-.modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.6);
-  display:flex;
-  justify-content:center;
-  align-items:center;
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.6);
+  justify-content: center;
+  align-items: center;
 }
+
+/* ESSA LINHA RESOLVE TUDO */
+.modal.hidden { display: none; }
 
 .modal-content{
   background:#fff;

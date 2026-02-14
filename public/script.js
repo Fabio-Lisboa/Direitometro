@@ -294,7 +294,7 @@ function showResults() {
       <div style="font-size: 1.1rem; line-height:1.5; margin-top:5px;">
         ${displayEmojis || "<small style='color:#999'>Aguardando votos...</small>"}
       </div>
-      ${(currentUser === userData.name && isTarget) ? `<div style="font-size:0.75rem; color:#e53e3e; margin-top:8px; font-weight:bold;">🔓 Você é o Lanterna! Clique nos emojis para descobrir quem mandou.</div>` : ""}
+      ${isTarget ? `<div class="lanterna-warning">FOFOCA LIBERADA: clique nos emojis para ver quem votou.</div>` : ""}
     `;
     
     el.results.list.appendChild(div);

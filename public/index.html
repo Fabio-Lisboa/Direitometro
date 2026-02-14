@@ -9,171 +9,127 @@
 </head>
 <body>
 
-  <div class="main-wrapper">
+  <div class="main-container">
 
     <div id="login-screen" class="screen active">
-      <div class="login-card fade-in">
-        <div class="brand-header">
+      <div class="login-card">
+        <div class="logo-area">
           <h1>⚖️ Direitômetro</h1>
           <p>O Tribunal Digital</p>
         </div>
         
         <div class="input-group">
-          <label>Quem é você?</label>
-          <input id="username" placeholder="Seu Codinome" autocomplete="off" />
+          <label>Codinome</label>
+          <input id="username" placeholder="Quem é você?" autocomplete="off" />
         </div>
         
         <div class="input-group">
-          <label>Senha de acesso</label>
+          <label>Senha</label>
           <input id="password" type="password" maxlength="1" placeholder="#" />
         </div>
 
-        <button id="loginBtn" class="btn-primary big-btn">ENTRAR NA SESSÃO</button>
+        <button id="loginBtn" class="btn-primary big-btn">ENTRAR</button>
         <p id="loginError" class="error-msg"></p>
       </div>
     </div>
 
     <div id="app-screen" class="screen hidden">
       
-      <header class="top-bar">
-        <div class="user-profile">
-          <div class="avatar-circle" id="user-avatar">?</div>
-          <div class="user-text">
-            <span class="greeting">Olá,</span>
-            <strong id="welcome-msg">Usuário</strong>
-          </div>
+      <header class="app-header">
+        <div class="user-chip">
+          <span class="avatar" id="user-avatar">?</span>
+          <span class="username" id="welcome-msg">...</span>
         </div>
         <button id="settings-btn" class="icon-btn">⚙️</button>
       </header>
 
-      <main class="content-area">
+      <main class="feed-content">
         
-        <section id="tab-vote" class="tab-content active">
-          <div class="section-header">
-            <h2>Julgamento</h2>
-            <p id="pending-count">Carregando...</p>
-          </div>
-          <div id="users-to-vote" class="card-list"></div>
-        </section>
-
-        <section id="tab-rank" class="tab-content hidden">
-          <div class="section-header">
-            <h2>Reputação</h2>
-            <p>Quem subiu e quem desceu.</p>
-          </div>
-          <div id="results-list" class="card-list"></div>
-          <div style="padding: 20px 0; text-align: center;">
-             <button id="refresh-btn" class="btn-secondary small-btn">🔄 Atualizar Dados</button>
-          </div>
-        </section>
-
-        <section id="tab-intrigue" class="tab-content hidden">
-          <div class="section-header">
+        <div id="intrigue-area" class="card intrigue-card hidden">
+          <div class="card-header intrigue-header">
+            <span class="icon">🔥</span>
             <h2>A Intriga</h2>
-            <p>O dilema diário do grupo.</p>
           </div>
-          
-          <div class="intrigue-card">
-            <div id="intrigue-waiting" class="intrigue-state hidden">
-              <div class="status-icon">⚖️</div>
-              <h3>Aguardando o Juiz</h3>
-              <p>O Juiz sorteado de hoje é:</p>
-              <div class="judge-badge" id="judge-name">...</div>
-            </div>
 
-            <div id="intrigue-play" class="intrigue-state hidden">
-              <div class="judge-header">👑 Você é o Juiz!</div>
-              <h3 id="intrigue-q-text" class="q-text">...</h3>
-              <div id="intrigue-inputs" class="inputs-list"></div>
-              <button id="submit-intrigue-btn" class="btn-primary">Publicar Sentença</button>
-            </div>
+          <div id="intrigue-waiting" class="intrigue-state hidden">
+            <p>O Juiz sorteado de hoje é:</p>
+            <div class="judge-badge" id="judge-name">...</div>
+            <small>Aguardando sentença...</small>
+          </div>
 
-            <div id="intrigue-result" class="intrigue-state hidden">
-              <h3 id="res-q-text" class="q-text-small">...</h3>
-              <div class="versus-board">
-                <div class="team-col team-a">
-                  <h4 id="label-a">Opção A</h4>
-                  <div id="list-a" class="team-list"></div>
-                </div>
-                <div class="vs-divider">VS</div>
-                <div class="team-col team-b">
-                  <h4 id="label-b">Opção B</h4>
-                  <div id="list-b" class="team-list"></div>
-                </div>
+          <div id="intrigue-play" class="intrigue-state hidden">
+            <div class="you-are-judge">👑 Você é o Juiz!</div>
+            <h3 id="intrigue-q-text">...</h3>
+            <div id="intrigue-inputs" class="inputs-list"></div>
+            <button id="submit-intrigue-btn" class="btn-primary">Publicar Sentença</button>
+          </div>
+
+          <div id="intrigue-result" class="intrigue-state hidden">
+            <h3 id="res-q-text" class="q-title">...</h3>
+            <div class="versus-container">
+              <div class="team team-a">
+                <h4 id="label-a">...</h4>
+                <div id="list-a"></div>
               </div>
-              <p class="signature">Juiz: <span id="res-judge"></span></p>
+              <div class="vs-badge">VS</div>
+              <div class="team team-b">
+                <h4 id="label-b">...</h4>
+                <div id="list-b"></div>
+              </div>
             </div>
+            <div class="judge-sign">Juiz: <span id="res-judge"></span></div>
           </div>
-        </section>
+        </div>
+
+        <div id="voting-area" class="card hidden">
+          <div class="card-header">
+            <h2>Julgamento</h2>
+            <span class="badge-count" id="pending-count">0</span>
+          </div>
+          <div id="users-to-vote" class="vote-list"></div>
+        </div>
+
+        <div id="results-area" class="card hidden">
+          <div class="card-header">
+            <h2>Reputação</h2>
+            <button id="refresh-btn" class="refresh-icon">🔄</button>
+          </div>
+          <div id="results-list" class="rank-list"></div>
+        </div>
 
       </main>
-
-      <nav class="bottom-nav">
-        <button class="nav-item active" onclick="switchTab('vote')">
-          <span class="nav-icon">⚖️</span>
-          <span class="nav-label">Votar</span>
-        </button>
-        <button class="nav-item" onclick="switchTab('rank')">
-          <span class="nav-icon">🏆</span>
-          <span class="nav-label">Ranking</span>
-        </button>
-        <button class="nav-item" onclick="switchTab('intrigue')">
-          <span class="nav-icon">🔥</span>
-          <span class="nav-label">Intriga</span>
-        </button>
-      </nav>
-
     </div>
 
   </div>
 
   <div id="emoji-modal" class="modal hidden">
-    <div class="modal-content slide-up">
-      <div class="modal-header">
-        <h3>Sua Sentença:</h3>
-        <button id="close-modal" class="close-x">✕</button>
+    <div class="modal-sheet">
+      <div class="sheet-header">
+        <h3>Sua Sentença</h3>
+        <button id="close-modal">✕</button>
       </div>
       <div id="emoji-grid" class="emoji-grid"></div>
     </div>
   </div>
 
   <div id="settings-modal" class="modal hidden">
-    <div class="modal-content fade-in">
+    <div class="modal-card">
       <h3>Configurações</h3>
       <div id="normal-settings">
-        <label>Nova Senha:</label>
+        <label>Alterar Senha:</label>
         <div class="row-input">
           <input id="new-password" maxlength="1" placeholder="#" />
           <button id="save-pass-btn" class="btn-primary">Salvar</button>
         </div>
-        <button id="logout-btn" class="btn-secondary full-width" style="margin-top:10px">Sair da Conta</button>
-        <button id="delete-account-btn" class="btn-danger full-width" style="margin-top:10px">Excluir Conta</button>
+        <hr>
+        <button id="logout-btn" class="btn-secondary full">Sair</button>
+        <button id="delete-account-btn" class="btn-danger full mt-10">Excluir Conta</button>
       </div>
       <div id="admin-area" class="hidden"></div>
-      <button id="close-settings" class="btn-link" style="margin-top:15px">Fechar</button>
+      <button id="close-settings" class="btn-text mt-10">Fechar</button>
     </div>
   </div>
 
   <script type="module" src="script.js"></script>
-  <script>
-    window.switchTab = function(tabName) {
-      // Esconde todas as seções
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-      
-      // Remove active dos botões
-      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-
-      // Mostra a certa
-      document.getElementById('tab-' + tabName).classList.remove('hidden');
-      document.getElementById('tab-' + tabName).classList.add('active');
-      
-      // Ativa botão (busca pelo onclick para simplificar)
-      const btns = document.querySelectorAll('.nav-item');
-      if(tabName === 'vote') btns[0].classList.add('active');
-      if(tabName === 'rank') btns[1].classList.add('active');
-      if(tabName === 'intrigue') btns[2].classList.add('active');
-    }
-  </script>
 </body>
 </html>

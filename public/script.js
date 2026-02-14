@@ -76,6 +76,16 @@ const el = {
   settings: { overlay: document.getElementById("settings-modal"), title: document.getElementById("settings-title"), normalArea: document.getElementById("normal-user-settings"), adminArea: document.getElementById("admin-user-list"), newPass: document.getElementById("new-password"), saveBtn: document.getElementById("save-pass-btn"), deleteBtn: document.getElementById("delete-account-btn"), closeBtn: document.getElementById("close-settings") }
 };
 
+el.tabs = {
+  ranking: document.getElementById("tab-ranking"),
+  reveal: document.getElementById("tab-reveal"),
+  rankingView: document.getElementById("ranking-view"),
+  revealView: document.getElementById("reveal-view"),
+  revealChoices: document.getElementById("reveal-choices"),
+  revealResult: document.getElementById("reveal-result")
+};
+
+
 // ============================================================
 // REALTIME LISTENERS
 // ============================================================

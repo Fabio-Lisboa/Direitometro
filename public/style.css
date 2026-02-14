@@ -313,3 +313,48 @@ h1, h2, h3 { margin: 0; text-align: center; color: #2d3748; }
   margin-top: 8px;
 }
 
+/* TABS */
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tab {
+  flex: 1;
+  background: #edf2f7;
+  color: #4a5568;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+.tab.active {
+  background: #667eea;
+  color: white;
+}
+
+/* Reveal */
+#reveal-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.reveal-btn {
+  font-size: 1.6rem;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #f1f5f9;
+  cursor: pointer;
+}
+
+#reveal-result {
+  margin-top: 16px;
+  padding: 14px;
+  background: #fff7ed;
+  border-radius: 12px;
+  text-align: center;
+  font-weight: bold;
+}
+

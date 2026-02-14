@@ -211,7 +211,7 @@ h1, h2, h3 { margin: 0; text-align: center; color: #2d3748; }
 }
 
 /* =========================================
-   NOVO: RANKING BADGES & LANTERNA
+   RANKING BADGES & LANTERNA
    ========================================= */
 .target-of-the-day {
   border: 2px solid #e53e3e !important;
@@ -262,3 +262,114 @@ h1, h2, h3 { margin: 0; text-align: center; color: #2d3748; }
 .score-pos { background: linear-gradient(135deg, #48bb78, #38a169); } /* Verde */
 .score-neg { background: linear-gradient(135deg, #e53e3e, #c53030); } /* Vermelho */
 .score-neu { background: linear-gradient(135deg, #a0aec0, #718096); } /* Cinza */
+
+/* =========================================
+   DETALHES DOS VOTOS DO LANTERNA (para todos)
+   ========================================= */
+.lanterna-votos-detalhe {
+  margin-top: 10px;
+  padding: 10px;
+  background: #ffe5e5;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  border-left: 3px solid #e53e3e;
+}
+.lanterna-votos-detalhe p {
+  margin: 5px 0;
+  font-weight: bold;
+  color: #c53030;
+}
+.lanterna-votos-detalhe ul {
+  margin: 5px 0 0 0;
+  padding-left: 20px;
+}
+.lanterna-votos-detalhe li {
+  list-style-type: none;
+  margin-bottom: 4px;
+}
+
+/* =========================================
+   INTRIGA DO DIA
+   ========================================= */
+.intriga-card {
+  background: #fef3c7;
+  border: 2px solid #fbbf24;
+  border-radius: 16px;
+  padding: 16px;
+  margin-top: 20px;
+}
+.intriga-card h3 {
+  color: #b45309;
+  margin-top: 0;
+}
+.intriga-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.intriga-item {
+  background: white;
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.intriga-item .emoji {
+  font-size: 2rem;
+  min-width: 50px;
+  text-align: center;
+}
+.intriga-item .nome {
+  font-weight: bold;
+  flex: 1;
+}
+.intriga-resposta {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+}
+.intriga-resposta button {
+  width: 60px;
+  padding: 8px;
+  font-size: 1.5rem;
+  background: #f3f4f6;
+  color: #1f2937;
+}
+.intriga-resposta button.selecionado {
+  background: #fbbf24;
+  border: 2px solid #b45309;
+}
+
+/* Lista de usuários no modal de intriga */
+.intriga-users-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin: 15px 0;
+}
+.intriga-user-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+.intriga-user-row .nome {
+  font-weight: 600;
+}
+.intriga-user-row .opcoes {
+  display: flex;
+  gap: 8px;
+}
+.intriga-user-row .opcoes button {
+  width: 50px;
+  padding: 8px;
+  font-size: 1.5rem;
+  background: #edf2f7;
+  color: #2d3748;
+}
+.intriga-user-row .opcoes button.selecionado {
+  background: #fbbf24;
+  border: 2px solid #b45309;
+}

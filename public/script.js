@@ -272,13 +272,16 @@ function showResults() {
     userData.emojis.forEach(e => counts[e] = (counts[e] || 0) + 1);
     
     const displayEmojis = Object.entries(counts)
-      .sort((a, b) => b[1] - a[1]) 
-      .map(([emoji, qtd]) => {
-        if (currentUser === userData.name && isTarget) {
-           return `<span class="reveal-enabled" onclick="revealVoters('${emoji}')" title="Ver quem mandou">${emoji} <small>x${qtd}</small></span>`;
-        }
-        return `<span>${emoji} <small>x${qtd}</small></span>`;
-      }).join("&nbsp;&nbsp;");
+    .sort((a, b) => b[1] - a[1])
+    .map(([emoji, qtd]) => {
+      // TODOS podem clicar se for o lanterna
+      if (isTarget) {
+        return `<span class="reveal-enabled" onclick="revealVoters('${userData.name}','${emoji}')" title="Ver quem mandou">
+          ${emoji} <small>x${qtd}</small>
+        </span>`;
+    }
+    return `<span>${emoji} <small>x${qtd}</small></span>`;
+  }).join("&nbsp;&nbsp;");
 
     const badge = isTarget ? `<span class="target-badge">💀 Lanterna</span>` : "";
     const trophy = (index === 0 && userData.score > 0) ? "👑" : ""; 
@@ -298,21 +301,19 @@ function showResults() {
   });
 }
 
-// --- FUNÇÃO ESPIÃO ---
-window.revealVoters = function(emojiToReveal) {
-  const currentUser = sessionStorage.getItem("qm_logged");
+window.revealVoters = function(targetUser, emojiToReveal) {
   const votesToday = globalVotes[TODAY] || {};
   const culprits = [];
 
   Object.entries(votesToday).forEach(([voter, votes]) => {
     if (!globalUsers[voter] && voter !== ADMIN_USER) return;
-    if (votes[currentUser] === emojiToReveal) {
+    if (votes[targetUser] === emojiToReveal) {
       culprits.push(voter);
     }
   });
 
   if (culprits.length > 0) {
-    alert(`Quem te mandou ${emojiToReveal}:\n\n${culprits.join(", ")}`);
+    alert(`${targetUser} recebeu ${emojiToReveal} de:\n\n${culprits.join(", ")}`);
   } else {
     alert("Ninguém encontrado.");
   }

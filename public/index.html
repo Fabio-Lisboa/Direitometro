@@ -2,123 +2,178 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Direitômetro Premium</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Direitômetro</title>
   <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
 
-  <div class="background-glow"></div>
+  <div class="main-wrapper">
 
-  <div class="container">
+    <div id="login-screen" class="screen active">
+      <div class="login-card fade-in">
+        <div class="brand-header">
+          <h1>⚖️ Direitômetro</h1>
+          <p>O Tribunal Digital</p>
+        </div>
+        
+        <div class="input-group">
+          <label>Quem é você?</label>
+          <input id="username" placeholder="Seu Codinome" autocomplete="off" />
+        </div>
+        
+        <div class="input-group">
+          <label>Senha de acesso</label>
+          <input id="password" type="password" maxlength="1" placeholder="#" />
+        </div>
 
-    <div id="app-header" class="header-bar hidden">
-      <div class="user-info">
-        <span class="status-dot"></span>
-        <span id="welcome-msg">Carregando...</span>
+        <button id="loginBtn" class="btn-primary big-btn">ENTRAR NA SESSÃO</button>
+        <p id="loginError" class="error-msg"></p>
       </div>
-      <button id="settings-btn" class="icon-btn">⚙️</button>
     </div>
 
-    <div id="login" class="card glass-effect">
-      <div class="login-header">
-        <h1>⚖️ Direitômetro</h1>
-        <p class="subtitle">A Corte está em sessão.</p>
-      </div>
+    <div id="app-screen" class="screen hidden">
       
-      <div class="input-group">
-        <input id="username" placeholder="Codinome" autocomplete="off" />
-        <input id="password" type="password" maxlength="1" placeholder="Senha (1 char)" />
-      </div>
-
-      <button id="loginBtn" type="button" class="btn-glow">ENTRAR NO TRIBUNAL</button>
-      <p id="loginError" class="error"></p>
-    </div>
-
-    <div id="intrigue-area" class="card glass-effect intrigue-card hidden">
-      <div class="intrigue-header">
-        <span class="intrigue-icon">🔥</span>
-        <h3>A Intriga do Dia</h3>
-      </div>
-      
-      <div id="intrigue-waiting" class="intrigue-content hidden">
-        <p>O Juiz sorteado de hoje é: <strong id="judge-name" class="highlight-text">...</strong></p>
-        <p class="status-text">Aguardando veredito...</p>
-      </div>
-
-      <div id="intrigue-judge-panel" class="intrigue-content hidden">
-        <p class="question-text" id="intrigue-question">Carregando pergunta...</p>
-        <div id="intrigue-inputs" class="intrigue-inputs"></div>
-        <button id="submit-intrigue-btn" class="primary-btn">Publicar Sentença</button>
-      </div>
-
-      <div id="intrigue-result" class="intrigue-content hidden">
-        <p class="question-title" id="result-question">...</p>
-        <div class="versus-container">
-          <div class="team-a">
-            <h4 id="label-a">Time A</h4>
-            <div id="list-a"></div>
-          </div>
-          <div class="divider">VS</div>
-          <div class="team-b">
-            <h4 id="label-b">Time B</h4>
-            <div id="list-b"></div>
+      <header class="top-bar">
+        <div class="user-profile">
+          <div class="avatar-circle" id="user-avatar">?</div>
+          <div class="user-text">
+            <span class="greeting">Olá,</span>
+            <strong id="welcome-msg">Usuário</strong>
           </div>
         </div>
-        <p class="judge-signature">Sentença proferida por <span id="result-judge"></span></p>
-      </div>
-    </div>
+        <button id="settings-btn" class="icon-btn">⚙️</button>
+      </header>
 
-    <div id="voting-area" class="card glass-effect hidden">
-      <div class="header">
-        <h2>Julgamento</h2>
-        <p id="pending-count" class="status-text"></p>
-      </div>
-      <div id="users-to-vote" class="user-list"></div>
-    </div>
+      <main class="content-area">
+        
+        <section id="tab-vote" class="tab-content active">
+          <div class="section-header">
+            <h2>Julgamento</h2>
+            <p id="pending-count">Carregando...</p>
+          </div>
+          <div id="users-to-vote" class="card-list"></div>
+        </section>
 
-    <div id="results-area" class="card glass-effect hidden">
-      <div class="results-header-box">
-        <h2>Veredito Final</h2>
-        <p class="subtitle">Reputação Atualizada</p>
-      </div>
-      
-      <div id="results-list"></div>
+        <section id="tab-rank" class="tab-content hidden">
+          <div class="section-header">
+            <h2>Reputação</h2>
+            <p>Quem subiu e quem desceu.</p>
+          </div>
+          <div id="results-list" class="card-list"></div>
+          <div style="padding: 20px 0; text-align: center;">
+             <button id="refresh-btn" class="btn-secondary small-btn">🔄 Atualizar Dados</button>
+          </div>
+        </section>
 
-      <div class="action-buttons">
-        <button id="refresh-btn" class="secondary-btn">Atualizar</button>
-        <button id="logout-btn" class="outline-btn">Sair</button>
-      </div>
+        <section id="tab-intrigue" class="tab-content hidden">
+          <div class="section-header">
+            <h2>A Intriga</h2>
+            <p>O dilema diário do grupo.</p>
+          </div>
+          
+          <div class="intrigue-card">
+            <div id="intrigue-waiting" class="intrigue-state hidden">
+              <div class="status-icon">⚖️</div>
+              <h3>Aguardando o Juiz</h3>
+              <p>O Juiz sorteado de hoje é:</p>
+              <div class="judge-badge" id="judge-name">...</div>
+            </div>
+
+            <div id="intrigue-play" class="intrigue-state hidden">
+              <div class="judge-header">👑 Você é o Juiz!</div>
+              <h3 id="intrigue-q-text" class="q-text">...</h3>
+              <div id="intrigue-inputs" class="inputs-list"></div>
+              <button id="submit-intrigue-btn" class="btn-primary">Publicar Sentença</button>
+            </div>
+
+            <div id="intrigue-result" class="intrigue-state hidden">
+              <h3 id="res-q-text" class="q-text-small">...</h3>
+              <div class="versus-board">
+                <div class="team-col team-a">
+                  <h4 id="label-a">Opção A</h4>
+                  <div id="list-a" class="team-list"></div>
+                </div>
+                <div class="vs-divider">VS</div>
+                <div class="team-col team-b">
+                  <h4 id="label-b">Opção B</h4>
+                  <div id="list-b" class="team-list"></div>
+                </div>
+              </div>
+              <p class="signature">Juiz: <span id="res-judge"></span></p>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+      <nav class="bottom-nav">
+        <button class="nav-item active" onclick="switchTab('vote')">
+          <span class="nav-icon">⚖️</span>
+          <span class="nav-label">Votar</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('rank')">
+          <span class="nav-icon">🏆</span>
+          <span class="nav-label">Ranking</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('intrigue')">
+          <span class="nav-icon">🔥</span>
+          <span class="nav-label">Intriga</span>
+        </button>
+      </nav>
+
     </div>
 
   </div>
 
   <div id="emoji-modal" class="modal hidden">
-    <div class="modal-content glass-effect">
-      <h3 id="modal-title">Sentença:</h3>
+    <div class="modal-content slide-up">
+      <div class="modal-header">
+        <h3>Sua Sentença:</h3>
+        <button id="close-modal" class="close-x">✕</button>
+      </div>
       <div id="emoji-grid" class="emoji-grid"></div>
-      <button id="close-modal" class="danger-btn">Cancelar</button>
     </div>
   </div>
 
   <div id="settings-modal" class="modal hidden">
-    <div class="modal-content glass-effect">
-      <h3 id="settings-title">Configurações</h3>
-      <div id="normal-user-settings">
-        <p>Nova Senha:</p>
-        <div class="input-group row">
+    <div class="modal-content fade-in">
+      <h3>Configurações</h3>
+      <div id="normal-settings">
+        <label>Nova Senha:</label>
+        <div class="row-input">
           <input id="new-password" maxlength="1" placeholder="#" />
-          <button id="save-pass-btn">Salvar</button>
+          <button id="save-pass-btn" class="btn-primary">Salvar</button>
         </div>
-        <hr>
-        <button id="delete-account-btn" class="danger-btn text-only">Excluir Conta</button>
+        <button id="logout-btn" class="btn-secondary full-width" style="margin-top:10px">Sair da Conta</button>
+        <button id="delete-account-btn" class="btn-danger full-width" style="margin-top:10px">Excluir Conta</button>
       </div>
-      <div id="admin-user-list" class="hidden"></div>
-      <button id="close-settings" class="outline-btn" style="margin-top:15px">Fechar</button>
+      <div id="admin-area" class="hidden"></div>
+      <button id="close-settings" class="btn-link" style="margin-top:15px">Fechar</button>
     </div>
   </div>
 
   <script type="module" src="script.js"></script>
+  <script>
+    window.switchTab = function(tabName) {
+      // Esconde todas as seções
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      
+      // Remove active dos botões
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+      // Mostra a certa
+      document.getElementById('tab-' + tabName).classList.remove('hidden');
+      document.getElementById('tab-' + tabName).classList.add('active');
+      
+      // Ativa botão (busca pelo onclick para simplificar)
+      const btns = document.querySelectorAll('.nav-item');
+      if(tabName === 'vote') btns[0].classList.add('active');
+      if(tabName === 'rank') btns[1].classList.add('active');
+      if(tabName === 'intrigue') btns[2].classList.add('active');
+    }
+  </script>
 </body>
 </html>

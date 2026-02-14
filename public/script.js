@@ -3,7 +3,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 import { getDatabase, ref, set, update, onValue, remove, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 // ==========================================================
-// CONFIGURAÇÃO CONECTADA AO SEU PROJETO
+// CONFIGURAÇÃO
 // ==========================================================
 const firebaseConfig = {
   apiKey: "AIzaSyDqRq9Z1IsDOF6lG3kwyqD9T1eUijfhJh8",
@@ -15,17 +15,14 @@ const firebaseConfig = {
   appId: "1:198574297065:web:7fbc7a5cc9ea72b0a9c578"
 };
 
-// Inicializa Firebase
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
-// --- CONFIGURAÇÕES GERAIS ---
 const TODAY = new Date().toISOString().split('T')[0];
 const ADMIN_USER = "ADMIN";
 const ADMIN_PASS = "#"; 
 
-// --- LISTAS DE EMOJIS PARA PONTUAÇÃO ---
-
+// --- LISTAS DE EMOJIS (+1, -1, 0) ---
 const POSITIVE_EMOJIS = [
   "❤️","🔥","👍","🥰","😍","👏","🙏","💪","🎉","😁","💕","☺️","👑","🏆","🥇","💎",
   "💰","🚀","😎","✨","💖","💯","🌹","🫶","🤝","✌️","🤘","🤙","🛡️","😇","✅",
@@ -57,19 +54,30 @@ const NEUTRAL_EMOJIS = [
   "🍣","🍱","🥟","🍤","🍙","🍚","🍘","🍥","🥠","🥮","🍢","🍡","🍧","🍨","🍦",
   "🥧","🧁","🍰","🎂","🍮","🍭","🍬","🍫","🍩","🍪","🍯","🥛","🍵","🍶","🍾"
 ];
-
-// Lista unificada para o Modal
 const EMOJIS = [...POSITIVE_EMOJIS, ...NEGATIVE_EMOJIS, ...NEUTRAL_EMOJIS];
 
-// Variáveis Globais
+// --- PERGUNTAS DA INTRIGA ---
+const INTRIGUE_QUESTIONS = [
+  { q: "Apocalipse Zumbi: Quem vive e quem morre?", a: "Sobrevive", b: "Morre Primeiro" },
+  { q: "Numa ilha deserta:", a: "O Líder", b: "O Jantar" },
+  { q: "Quem tem mais chance de ser preso?", a: "Inocente", b: "Culpado" },
+  { q: "Quem seria cancelado na internet?", a: "Cancelado", b: "Amado" },
+  { q: "Num filme de terror:", a: "O Assassino", b: "A Vítima" },
+  { q: "Quem gastaria todo o dinheiro da Mega Sena?", a: "Investidor", b: "Falido em 1 mês" },
+  { q: "Quem chora no banho?", a: "Chora", b: "Nem liga" }
+];
+
+// VARIÁVEIS GLOBAIS
 let globalUsers = {};
 let globalVotes = {};
+let globalIntrigue = {};
 let currentTargetUser = null;
 
-// Elementos DOM
+// ELEMENTOS DOM
 const el = {
   header: { bar: document.getElementById("app-header"), msg: document.getElementById("welcome-msg"), btn: document.getElementById("settings-btn") },
   login: { card: document.getElementById("login"), btn: document.getElementById("loginBtn"), user: document.getElementById("username"), pass: document.getElementById("password"), error: document.getElementById("loginError") },
+  intrigue: { card: document.getElementById("intrigue-area"), waiting: document.getElementById("intrigue-waiting"), judge: document.getElementById("intrigue-judge-panel"), result: document.getElementById("intrigue-result"), questionWait: document.getElementById("intrigue-question"), inputs: document.getElementById("intrigue-inputs"), submit: document.getElementById("submit-intrigue-btn") },
   vote: { card: document.getElementById("voting-area"), list: document.getElementById("users-to-vote"), count: document.getElementById("pending-count") },
   results: { card: document.getElementById("results-area"), list: document.getElementById("results-list"), refreshBtn: document.getElementById("refresh-btn"), logoutBtn: document.getElementById("logout-btn") },
   modal: { overlay: document.getElementById("emoji-modal"), title: document.getElementById("modal-title"), grid: document.getElementById("emoji-grid"), close: document.getElementById("close-modal") },
@@ -79,15 +87,9 @@ const el = {
 // ============================================================
 // REALTIME LISTENERS
 // ============================================================
-onValue(ref(database, 'users'), (snapshot) => {
-  globalUsers = snapshot.val() || {};
-  refreshInterface();
-});
-
-onValue(ref(database, 'votes'), (snapshot) => {
-  globalVotes = snapshot.val() || {};
-  refreshInterface();
-});
+onValue(ref(database, 'users'), (snap) => { globalUsers = snap.val() || {}; refreshInterface(); });
+onValue(ref(database, 'votes'), (snap) => { globalVotes = snap.val() || {}; refreshInterface(); });
+onValue(ref(database, `intrigue/${TODAY}`), (snap) => { globalIntrigue = snap.val() || {}; refreshInterface(); });
 
 function refreshInterface() {
   const currentUser = sessionStorage.getItem("qm_logged");
@@ -96,13 +98,14 @@ function refreshInterface() {
       showResults(); 
       if (!el.settings.overlay.classList.contains("hidden")) renderAdminUserList();
     } else {
+      processIntrigue(); // Processa a Intriga antes
       checkVotingStatus();
     }
   }
 }
 
 // ============================================================
-// LOGIN
+// LÓGICA DE LOGIN
 // ============================================================
 el.login.btn.addEventListener("click", async () => {
   const user = el.login.user.value.trim();
@@ -111,19 +114,17 @@ el.login.btn.addEventListener("click", async () => {
 
   if (!user || pass.length !== 1) { el.login.error.textContent = "Nome e senha (1 char) obrigatórios."; return; }
 
-  // ADMIN
   if (user === ADMIN_USER && pass === ADMIN_PASS) {
     sessionStorage.setItem("qm_logged", ADMIN_USER);
     initApp();
     return;
   }
 
-  // USUÁRIO COMUM
   if (globalUsers[user]) {
     if (globalUsers[user] !== pass) { el.login.error.textContent = "Senha incorreta."; return; }
   } else {
     if (user.toUpperCase() === ADMIN_USER) { el.login.error.textContent = "Reservado."; return; }
-    if (Object.values(globalUsers).includes(pass)) { el.login.error.textContent = "Caractere indisponível."; return; }
+    if (Object.values(globalUsers).includes(pass)) { el.login.error.textContent = "Indisponível."; return; }
     await set(ref(database, 'users/' + user), pass);
   }
 
@@ -141,8 +142,104 @@ function initApp() {
     el.header.msg.innerHTML = "⚡ Painel Admin";
     showResults();
   } else {
-    el.header.msg.textContent = `Olá, ${user}`;
-    checkVotingStatus();
+    el.header.msg.textContent = user;
+    refreshInterface();
+  }
+}
+
+// ============================================================
+// SISTEMA DE INTRIGA (NOVIDADE)
+// ============================================================
+function processIntrigue() {
+  const currentUser = sessionStorage.getItem("qm_logged");
+  const users = Object.keys(globalUsers).filter(u => u !== ADMIN_USER);
+  
+  if (users.length < 2) { el.intrigue.card.classList.add("hidden"); return; }
+  
+  el.intrigue.card.classList.remove("hidden");
+
+  // 1. Determina o Juiz (Pseudo-random baseado no dia)
+  // Se não tiver juiz salvo, define um baseado no hash do dia
+  const dayHash = TODAY.split('-').reduce((a,b) => parseInt(a)+parseInt(b), 0);
+  const judgeIndex = dayHash % users.length;
+  const judgeOfTheDay = users[judgeIndex];
+
+  // 2. Se já tem resultado, mostra
+  if (globalIntrigue.verdict) {
+    el.intrigue.waiting.classList.add("hidden");
+    el.intrigue.judge.classList.add("hidden");
+    el.intrigue.result.classList.remove("hidden");
+    
+    // Renderiza Resultado
+    const qData = globalIntrigue.questionData;
+    document.getElementById("result-question").innerText = qData.q;
+    document.getElementById("label-a").innerText = qData.a;
+    document.getElementById("label-b").innerText = qData.b;
+    document.getElementById("result-judge").innerText = judgeOfTheDay;
+
+    const listA = document.getElementById("list-a");
+    const listB = document.getElementById("list-b");
+    listA.innerHTML = ""; listB.innerHTML = "";
+
+    Object.entries(globalIntrigue.verdict).forEach(([u, team]) => {
+      const span = document.createElement("span");
+      span.className = "intrigue-item";
+      span.innerText = u;
+      if (team === "A") listA.appendChild(span);
+      else listB.appendChild(span);
+    });
+    return;
+  }
+
+  // 3. Se eu sou o Juiz e não tem resultado
+  if (currentUser === judgeOfTheDay) {
+    el.intrigue.waiting.classList.add("hidden");
+    el.intrigue.result.classList.add("hidden");
+    el.intrigue.judge.classList.remove("hidden");
+    
+    // Escolhe a pergunta (baseado no dia também para ser fixo)
+    const qIndex = dayHash % INTRIGUE_QUESTIONS.length;
+    const q = INTRIGUE_QUESTIONS[qIndex];
+    
+    el.intrigue.questionWait.innerText = q.q;
+    el.intrigue.inputs.innerHTML = "";
+    
+    // Renderiza inputs
+    users.forEach(u => {
+      if(u === currentUser) return; // Juiz não se julga
+      const row = document.createElement("div");
+      row.className = "intrigue-row";
+      row.innerHTML = `
+        <span>${u}</span>
+        <select id="intrigue-${u}" style="background:rgba(0,0,0,0.5); border:none; color:white; padding:5px;">
+          <option value="A">${q.a}</option>
+          <option value="B">${q.b}</option>
+        </select>
+      `;
+      el.intrigue.inputs.appendChild(row);
+    });
+
+    el.intrigue.submit.onclick = async () => {
+      const verdict = {};
+      users.forEach(u => {
+        if(u === currentUser) return;
+        const val = document.getElementById(`intrigue-${u}`).value;
+        verdict[u] = val;
+      });
+      
+      await set(ref(database, `intrigue/${TODAY}`), {
+        verdict: verdict,
+        questionData: q,
+        judge: currentUser
+      });
+    };
+
+  } else {
+    // 4. Se não sou juiz e não tem resultado -> Esperando
+    el.intrigue.waiting.classList.remove("hidden");
+    el.intrigue.judge.classList.add("hidden");
+    el.intrigue.result.classList.add("hidden");
+    document.getElementById("judge-name").innerText = judgeOfTheDay;
   }
 }
 
@@ -151,8 +248,6 @@ function initApp() {
 // ============================================================
 function checkVotingStatus() {
   const currentUser = sessionStorage.getItem("qm_logged");
-  if (!currentUser || currentUser === ADMIN_USER) return;
-
   const allUsers = Object.keys(globalUsers);
   const votesToday = globalVotes[TODAY] || {};
   const myVotes = votesToday[currentUser] || {};
@@ -166,12 +261,12 @@ function showVotingList(pendingUsers) {
   el.vote.card.classList.remove("hidden");
   el.results.card.classList.add("hidden");
   el.vote.list.innerHTML = "";
-  el.vote.count.textContent = `Faltam ${pendingUsers.length} para julgar.`;
+  el.vote.count.textContent = `Faltam ${pendingUsers.length}`;
 
   pendingUsers.forEach(target => {
     const btn = document.createElement("button");
     btn.className = "user-to-vote-btn"; 
-    btn.innerHTML = `<span>Votar em <strong>${target}</strong></span> <span>👉</span>`;
+    btn.innerHTML = `<span>Julgar <strong>${target}</strong></span> <span>⚖️</span>`;
     btn.onclick = () => openModal(target);
     el.vote.list.appendChild(btn);
   });
@@ -179,7 +274,7 @@ function showVotingList(pendingUsers) {
 
 function openModal(targetName) {
   currentTargetUser = targetName;
-  el.modal.title.textContent = `Defina ${targetName}:`;
+  el.modal.title.textContent = `Veredito para ${targetName}:`;
   el.modal.grid.innerHTML = "";
   EMOJIS.forEach(emoji => {
     const btn = document.createElement("button");
@@ -201,53 +296,49 @@ async function confirmVote(emoji) {
 }
 
 // ============================================================
-// RESULTADOS (COM PÍLULAS DE PONTUAÇÃO)
+// RESULTADOS & LANTERNA EXPOSED
 // ============================================================
 function showResults() {
   el.vote.card.classList.add("hidden");
   el.results.card.classList.remove("hidden");
   
   const votesToday = globalVotes[TODAY] || {};
-  
+  // Verifica se o Lanterna já expôs os votos publicamente
+  const lanternExposed = votesToday.lanternExposed || false;
+
   let ranking = [];
   const allUsers = Object.keys(globalUsers).filter(u => u !== ADMIN_USER);
 
-  if (allUsers.length === 0) { el.results.list.innerHTML = "<p>Nenhum participante.</p>"; return; }
+  if (allUsers.length === 0) { el.results.list.innerHTML = "<p>Sem réus.</p>"; return; }
 
-  // 1. Calcula Pontuação
+  // Calcula Pontos
   allUsers.forEach(user => {
     let score = 0;
-    let receivedEmojis = [];
+    let receivedData = []; // {emoji, from}
 
     Object.entries(votesToday).forEach(([voterKey, userVotes]) => {
       if (!globalUsers[voterKey] && voterKey !== ADMIN_USER) return;
-      
+      // Ignora chaves de controle
+      if (voterKey === "lanternExposed") return;
+
       const emoji = userVotes[user];
       if (emoji) {
-        receivedEmojis.push(emoji);
+        receivedData.push({ emoji: emoji, from: voterKey });
         if (POSITIVE_EMOJIS.includes(emoji)) score++;
         else if (NEGATIVE_EMOJIS.includes(emoji)) score--;
       }
     });
 
-    ranking.push({
-      name: user,
-      score: score,
-      emojis: receivedEmojis
-    });
+    ranking.push({ name: user, score: score, details: receivedData });
   });
 
-  // 2. Ordena (Maior Score primeiro)
   ranking.sort((a, b) => b.score - a.score);
-
-  // 3. Define Lanterna
+  
+  // Define Lanterna
   let targetName = null;
-  if (ranking.length > 0) {
-    const lastPlace = ranking[ranking.length - 1];
-    targetName = lastPlace.name;
-  }
+  if (ranking.length > 0) targetName = ranking[ranking.length - 1].name;
 
-  // 4. Renderiza
+  // Renderiza
   el.results.list.innerHTML = "";
   const currentUser = sessionStorage.getItem("qm_logged");
 
@@ -255,30 +346,25 @@ function showResults() {
     const div = document.createElement("div"); 
     div.className = "result-item"; 
     
-    // Define a classe CSS da Badge
     let scoreClass = "score-neu";
     let scoreSign = "";
-    if (userData.score > 0) {
-        scoreClass = "score-pos";
-        scoreSign = "+";
-    } else if (userData.score < 0) {
-        scoreClass = "score-neg";
-    }
+    if (userData.score > 0) { scoreClass = "score-pos"; scoreSign = "+"; }
+    else if (userData.score < 0) { scoreClass = "score-neg"; }
 
     const isTarget = (userData.name === targetName);
     if (isTarget) div.classList.add("target-of-the-day");
 
-    const counts = {}; 
-    userData.emojis.forEach(e => counts[e] = (counts[e] || 0) + 1);
-    
-    const displayEmojis = Object.entries(counts)
-      .sort((a, b) => b[1] - a[1]) 
-      .map(([emoji, qtd]) => {
-        if (currentUser === userData.name && isTarget) {
-           return `<span class="reveal-enabled" onclick="revealVoters('${emoji}')" title="Ver quem mandou">${emoji} <small>x${qtd}</small></span>`;
-        }
-        return `<span>${emoji} <small>x${qtd}</small></span>`;
-      }).join("&nbsp;&nbsp;");
+    // Agrupa emojis e, SE exposto, junta os nomes
+    const displayHTML = userData.details.map(d => {
+      // Se for lanterna E estiver exposto, mostra o nome de quem mandou
+      if (isTarget && lanternExposed && NEGATIVE_EMOJIS.includes(d.emoji)) {
+        return `<div style="display:inline-block; text-align:center; margin:0 5px;">
+                  <span style="font-size:1.5rem">${d.emoji}</span><br>
+                  <span class="exposed-voter">${d.from}</span>
+                </div>`;
+      }
+      return `<span style="font-size:1.5rem; margin:0 2px;">${d.emoji}</span>`;
+    }).join("");
 
     const badge = isTarget ? `<span class="target-badge">💀 Lanterna</span>` : "";
     const trophy = (index === 0 && userData.score > 0) ? "👑" : ""; 
@@ -288,48 +374,40 @@ function showResults() {
         <strong style="font-size:1.1rem">${trophy} ${userData.name} ${badge}</strong>
         <span class="score-badge ${scoreClass}">${scoreSign}${userData.score}</span>
       </div>
-      <div style="font-size: 1.1rem; line-height:1.5; margin-top:5px;">
-        ${displayEmojis || "<small style='color:#999'>Aguardando votos...</small>"}
+      <div style="margin-top:5px; display:flex; flex-wrap:wrap; align-items:flex-start;">
+        ${displayHTML || "<small style='color:#666'>Sem votos</small>"}
       </div>
-      ${(currentUser === userData.name && isTarget) ? `<div style="font-size:0.75rem; color:#e53e3e; margin-top:8px; font-weight:bold;">🔓 Você é o Lanterna! Clique nos emojis para descobrir quem mandou.</div>` : ""}
     `;
+
+    // Botão de Exposição (Só aparece pro Lanterna se ainda não expôs)
+    if (currentUser === userData.name && isTarget && !lanternExposed) {
+      const btnExpose = document.createElement("button");
+      btnExpose.className = "expose-btn";
+      btnExpose.innerHTML = "🧨 DEDURAR: EXPOR TRAÍRAS PARA TODOS";
+      btnExpose.onclick = async () => {
+        if(confirm("Tem certeza? Isso vai mostrar quem votou mal em você NA TELA DE TODO MUNDO.")) {
+          await set(ref(database, `votes/${TODAY}/lanternExposed`), true);
+        }
+      };
+      div.appendChild(btnExpose);
+    }
     
     el.results.list.appendChild(div);
   });
 }
 
-// --- FUNÇÃO ESPIÃO ---
-window.revealVoters = function(emojiToReveal) {
-  const currentUser = sessionStorage.getItem("qm_logged");
-  const votesToday = globalVotes[TODAY] || {};
-  const culprits = [];
-
-  Object.entries(votesToday).forEach(([voter, votes]) => {
-    if (!globalUsers[voter] && voter !== ADMIN_USER) return;
-    if (votes[currentUser] === emojiToReveal) {
-      culprits.push(voter);
-    }
-  });
-
-  if (culprits.length > 0) {
-    alert(`Quem te mandou ${emojiToReveal}:\n\n${culprits.join(", ")}`);
-  } else {
-    alert("Ninguém encontrado.");
-  }
-};
-
 // ============================================================
-// ADMIN & SETTINGS
+// ADMIN
 // ============================================================
 el.header.btn.onclick = () => {
   const currentUser = sessionStorage.getItem("qm_logged");
   if (currentUser === ADMIN_USER) {
-    el.settings.title.textContent = "Admin - Usuários";
+    el.settings.title.textContent = "Admin";
     el.settings.normalArea.classList.add("hidden");
     el.settings.adminArea.classList.remove("hidden");
     renderAdminUserList();
   } else {
-    el.settings.title.textContent = "Meu Perfil";
+    el.settings.title.textContent = "Perfil";
     el.settings.normalArea.classList.remove("hidden");
     el.settings.adminArea.classList.add("hidden");
   }
@@ -340,17 +418,14 @@ el.settings.closeBtn.onclick = () => el.settings.overlay.classList.add("hidden")
 el.settings.saveBtn.onclick = async () => {
   const currentUser = sessionStorage.getItem("qm_logged");
   const newPass = el.settings.newPass.value.trim();
-  if (newPass.length !== 1) { alert("Senha deve ter 1 caractere."); return; }
-  const passTaken = Object.entries(globalUsers).some(([u, p]) => p === newPass && u !== currentUser);
-  if (passTaken) { alert("Caractere indisponível."); return; }
-  
+  if (newPass.length !== 1) { alert("1 char."); return; }
   await set(ref(database, 'users/' + currentUser), newPass);
-  alert("Salvo!"); el.settings.newPass.value = ""; el.settings.overlay.classList.add("hidden");
+  alert("Salvo!"); el.settings.overlay.classList.add("hidden");
 };
 
 el.settings.deleteBtn.onclick = async () => {
   const currentUser = sessionStorage.getItem("qm_logged");
-  if (confirm(`Excluir conta de ${currentUser}?`)) {
+  if (confirm(`Excluir?`)) {
     await remove(ref(database, 'users/' + currentUser));
     sessionStorage.removeItem("qm_logged"); location.reload();
   }
@@ -358,40 +433,26 @@ el.settings.deleteBtn.onclick = async () => {
 
 function renderAdminUserList() {
   el.settings.adminArea.innerHTML = "";
-
-  // --- BOTÃO DE ZERAR VOTAÇÃO (NOVIDADE) ---
   const resetBtn = document.createElement("button");
   resetBtn.className = "danger-btn";
-  resetBtn.style.marginBottom = "20px"; // Espaço para não grudar
-  resetBtn.style.border = "2px dashed white"; // Destaque visual
-  resetBtn.innerHTML = "REINICIAR VOTAÇÃO";
+  resetBtn.style.marginBottom = "20px"; 
+  resetBtn.style.border = "2px dashed red";
+  resetBtn.innerHTML = "REINICIAR DIA (INTRIGA E VOTOS)";
   
   resetBtn.onclick = async () => {
-    // Pergunta de segurança para não clicar sem querer
-    const confirmation = prompt("Digite 'ZERAR' para apagar os votos de hoje:");
-    if (confirmation === "ZERAR") {
+    if (prompt("Digite 'ZERAR'") === "ZERAR") {
       await remove(ref(database, `votes/${TODAY}`));
-      alert("Votação reiniciada!");
-      location.reload();
-    } else {
-      alert("Ação cancelada.");
+      await remove(ref(database, `intrigue/${TODAY}`)); // Zera intriga também
+      alert("Zerado!"); location.reload();
     }
   };
   el.settings.adminArea.appendChild(resetBtn);
-  // ------------------------------------------
 
   const userNames = Object.keys(globalUsers);
-  if (userNames.length === 0) { 
-    const p = document.createElement("p");
-    p.innerText = "Nenhum usuário comum cadastrado.";
-    el.settings.adminArea.appendChild(p);
-    return; 
-  }
-
   userNames.forEach(user => {
     if(user === ADMIN_USER) return; 
     const div = document.createElement("div"); div.className = "admin-user-item";
-    div.innerHTML = `<span>👤 ${user} (${globalUsers[user]})</span> <button class="danger-btn admin-delete-btn">Excluir</button>`;
+    div.innerHTML = `<span>${user} (${globalUsers[user]})</span> <button class="danger-btn admin-delete-btn">X</button>`;
     div.querySelector("button").onclick = async () => {
       if(confirm(`Banir ${user}?`)) await remove(ref(database, 'users/' + user));
     };

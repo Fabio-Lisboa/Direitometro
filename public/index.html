@@ -36,17 +36,34 @@
       <div id="users-to-vote" class="user-list"></div>
     </div>
 
-    <div id="results-area" class="card hidden">
-      <h2>🏆 Veredito do Dia</h2>
-      <p class="subtitle">Ranking de Reputação</p>
-      
-      <div id="results-list"></div>
+<div id="results-area" class="card hidden">
 
-      <div class="action-buttons">
-        <button id="refresh-btn" class="primary-btn">Atualizar</button>
-        <button id="logout-btn" class="secondary-btn">Sair</button>
-      </div>
-    </div>
+  <!-- TABS -->
+  <div class="tabs">
+    <button id="tab-ranking" class="tab active">🏆 Ranking</button>
+    <button id="tab-reveal" class="tab">🕵️ Descobrir Voto</button>
+  </div>
+
+  <!-- CONTEÚDO RANKING -->
+  <div id="ranking-view">
+    <h2>🏆 Veredito do Dia</h2>
+    <p class="subtitle">Ranking de Reputação</p>
+    <div id="results-list"></div>
+  </div>
+
+  <!-- CONTEÚDO REVEAL -->
+  <div id="reveal-view" class="hidden">
+    <h2>🕵️ Descobrir um Voto</h2>
+    <p class="subtitle">Escolha um emoji para revelar quem enviou.</p>
+    <div id="reveal-choices"></div>
+    <div id="reveal-result" class="hidden"></div>
+  </div>
+
+  <div class="action-buttons">
+    <button id="refresh-btn" class="primary-btn">Atualizar</button>
+    <button id="logout-btn" class="secondary-btn">Sair</button>
+  </div>
+</div>
 
   </div>
 

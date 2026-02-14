@@ -40,7 +40,14 @@
       <h2>🏆 Veredito do Dia</h2>
       <p class="subtitle">Ranking de Reputação</p>
       
+      <!-- Resultados do ranking -->
       <div id="results-list"></div>
+
+      <!-- Intriga do Dia -->
+      <div id="intriga-container" class="intriga-card hidden">
+        <h3>🤫 Intriga do Dia</h3>
+        <div id="intriga-content"></div>
+      </div>
 
       <div class="action-buttons">
         <button id="refresh-btn" class="primary-btn">Atualizar</button>
@@ -50,6 +57,7 @@
 
   </div>
 
+  <!-- Modal de emojis para votação normal -->
   <div id="emoji-modal" class="modal hidden">
     <div class="modal-content">
       <h3 id="modal-title">Escolha:</h3>
@@ -58,6 +66,7 @@
     </div>
   </div>
 
+  <!-- Modal de configurações / admin -->
   <div id="settings-modal" class="modal hidden">
     <div class="modal-content">
       <h3 id="settings-title">Gerenciar Perfil</h3>
@@ -75,6 +84,16 @@
       <div id="admin-user-list" class="hidden"></div>
 
       <button id="close-settings" class="secondary-btn" style="margin-top:15px">Fechar</button>
+    </div>
+  </div>
+
+  <!-- Modal da Intriga (para o sorteado responder) -->
+  <div id="intriga-modal" class="modal hidden">
+    <div class="modal-content">
+      <h3 id="intriga-modal-title">Responda a Intriga</h3>
+      <p id="intriga-question"></p>
+      <div id="intriga-users-list" class="intriga-users-list"></div>
+      <button id="close-intriga-modal" class="secondary-btn" style="margin-top:15px">Cancelar</button>
     </div>
   </div>
 

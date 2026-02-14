@@ -262,3 +262,54 @@ h1, h2, h3 { margin: 0; text-align: center; color: #2d3748; }
 .score-pos { background: linear-gradient(135deg, #48bb78, #38a169); } /* Verde */
 .score-neg { background: linear-gradient(135deg, #e53e3e, #c53030); } /* Vermelho */
 .score-neu { background: linear-gradient(135deg, #a0aec0, #718096); } /* Cinza */
+
+/* ===============================
+   REBRANDING DOS CARDS DE RANKING
+   =============================== */
+
+.result-item {
+  background: #f4f6fb;
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 14px;
+  border-left: 6px solid #7c3aed;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.result-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+}
+
+.result-header strong {
+  font-size: 1.15rem;
+}
+
+/* score estilo bolha */
+.score-badge {
+  border-radius: 999px;
+  font-size: 0.95rem;
+  padding: 8px 14px;
+}
+
+/* destaque campeão */
+.result-item:first-child {
+  border-left-color: #f59e0b;
+  background: #fffaf0;
+}
+
+/* lanterna MUITO visível */
+.target-of-the-day {
+  border: 2px solid #ef4444 !important;
+  background: #fff1f2 !important;
+}
+
+/* aviso do lanterna */
+.lanterna-warning {
+  color: #dc2626;
+  font-weight: 700;
+  font-size: 0.8rem;
+  margin-top: 8px;
+}
+
